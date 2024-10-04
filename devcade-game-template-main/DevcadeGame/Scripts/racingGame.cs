@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Devcade;
+using System.Diagnostics;
 
 // MAKE SURE YOU RENAME ALL PROJECT FILES FROM DevcadeGame TO YOUR YOUR GAME NAME
 namespace RacingGame
@@ -87,6 +88,11 @@ namespace RacingGame
 
 			// TODO: Add your update logic here
 
+
+
+
+
+			
 			base.Update(gameTime);
 		}
 
