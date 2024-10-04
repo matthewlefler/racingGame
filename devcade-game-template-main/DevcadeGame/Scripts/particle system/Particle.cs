@@ -5,5 +5,8 @@ using Devcade;
 
 namespace ParticleClass
 {
-    
+    class Particle
+    {
+        
+    }
 }
