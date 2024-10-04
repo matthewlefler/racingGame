@@ -16,8 +16,6 @@ namespace EntityClass
         internal Vector3 rotation;
 
         internal ModelMesh mesh;
-
-        private BasicEffect effect;
     #endregion
 
         public Entity(Vector3 position, Vector3 rotation, ModelMesh mesh)
@@ -33,7 +31,7 @@ namespace EntityClass
             this.rotation += rotation;
         }
 
-        public virtual void draw()
+        public virtual void draw(Effect effect)
         {
             foreach(EffectTechnique technique in effect.Techniques)
             {

@@ -70,9 +70,6 @@ namespace ParticleClass
         public Particle(Texture2D texture, Vector3 position, Vector3 rotation, float scale, Vector3 acceleration)
         {
             this.texture = texture;
-            this.position = position;
-            this.rotation = rotation;
-            this.scale = scale;
             this.acceleration = acceleration;
 
             this.quad = new Quad(position, rotation, scale);
