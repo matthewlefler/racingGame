@@ -34,9 +34,9 @@ namespace input
         //keylist for only activating keys once per press;
         List<inputKey> keyList = new List<inputKey>();
         //returns true only on the first time a key is down
-        public bool runOnKeyDown(int key)
+        public bool runOnKeyDown(int GameAction)
         {
-            inputKey inputKey = gameKeys[key];
+            inputKey inputKey = gameKeys[GameAction];
 
             bool DevcadeBool = true;
             foreach((int playerNum, Devcade.Input.ArcadeButtons? key) button in inputKey.devcadeKeys)
@@ -82,11 +82,17 @@ namespace input
 
             return false;
         }
-        public bool isKeyDown(int key)
+        public bool isKeyDown(int action)
         {
-            inputKey inputKey = gameKeys[key];
+            inputKey inputKey = gameKeys[action];
             
             bool DevcadeBool = true;
+
+            if(inputKey.devcadeKeys.Length < 1)
+            {
+                DevcadeBool = false;
+            }
+
             foreach((int playerNum, Devcade.Input.ArcadeButtons key) button in inputKey.devcadeKeys)
             {
                 if(!Input.GetButton(button.playerNum, button.key))
@@ -96,6 +102,12 @@ namespace input
             }
 
             bool keyboardBool = true;
+
+            if(inputKey.keyboardKeys.Length < 1)
+            {
+                keyboardBool = false;
+            }
+
             foreach(Keys button in inputKey.keyboardKeys)
             {
                 if(!Keyboard.GetState().IsKeyDown(button))

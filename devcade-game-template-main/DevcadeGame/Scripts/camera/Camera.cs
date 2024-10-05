@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System;
+using Microsoft.VisualBasic.FileIO;
 
 namespace CameraClass
 {
@@ -14,9 +15,7 @@ namespace CameraClass
 
         public float speed = 2f;
 
-        public float cameraHeight { get; private set; }
-
-        public Matrix viewMatrix { get { return Matrix.CreateLookAt(position, position + rotation * 10, Vector3.Transform(Vector3.UnitY, Matrix.CreateFromYawPitchRoll(rotation.X, rotation.Y,rotation.Z))); } private set { } }
+        public Matrix viewMatrix { get { return Matrix.CreateFromYawPitchRoll(rotation.X, rotation.Y, rotation.Z) * Matrix.CreateTranslation(position); } private set { } }
         public Matrix projectionMatrix;
 
         public Camera(Vector3 position, Vector3 rotation, GraphicsDeviceManager graphics)
@@ -31,7 +30,7 @@ namespace CameraClass
 
         public void deltaMove(Vector3 translation)
         {
-            this.position += translation;
+            this.position += translation * speed;
         }
 
         public void absoluteMove(Vector3 position)

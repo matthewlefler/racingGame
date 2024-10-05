@@ -15,8 +15,10 @@ namespace RacingGame
 {
 	public class Game1 : Game
 	{
+		private SpriteFont DebugFont; 
+
 		private GraphicsDeviceManager _graphics;
-		private SpriteBatch _spriteBatch;
+		private static SpriteBatch _spriteBatch;
 
 		private static Camera cameraPlayer1;
 
@@ -90,34 +92,30 @@ namespace RacingGame
 
 			Dictionary<int, inputKey> actionToKeyInput = new Dictionary<int, inputKey>();
 			
-			actionToKeyInput.Add()
-			actionToKeyInput.Add()
-			actionToKeyInput.Add()
-			actionToKeyInput.Add()
-			actionToKeyInput.Add()
-			actionToKeyInput.Add()
-			actionToKeyInput.Add()
-			actionToKeyInput.Add()
-
-
+			actionToKeyInput.Add((int) Actions.translateForward, new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.W} ));
+			actionToKeyInput.Add((int) Actions.translateBack,    new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.S} ));
+			actionToKeyInput.Add((int) Actions.translateLeft,    new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.A} ));
+			actionToKeyInput.Add((int) Actions.translateRight,   new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.D} ));
+			actionToKeyInput.Add((int) Actions.rotateUp,         new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Up} ));
+			actionToKeyInput.Add((int) Actions.rotateDown,       new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Down} ));
+			actionToKeyInput.Add((int) Actions.rotateLeft,       new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Left} ));
+			actionToKeyInput.Add((int) Actions.rotateRight,      new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Right} ));
 
 			Dictionary<int, string> actionToString = new Dictionary<int, string>();
 			
+			actionToString.Add((int) Actions.translateForward, "translate forward");
+			actionToString.Add((int) Actions.translateBack,    "translate back");
+			actionToString.Add((int) Actions.translateLeft,    "translate left");
+			actionToString.Add((int) Actions.translateRight,   "translate right");
+			actionToString.Add((int) Actions.rotateUp,         "rotate up");
+			actionToString.Add((int) Actions.rotateDown, 	   "rotate down");
+			actionToString.Add((int) Actions.rotateLeft,       "rotate left");
+			actionToString.Add((int) Actions.rotateRight,      "rotate right");
 
-
-
-			inputHandler = new InputHandler()
-
-
-
-
-
-
+			inputHandler = new InputHandler(actionToKeyInput, actionToString);
 
 			#endregion
 
-
-			
 			base.Initialize();
 		}
 
@@ -129,6 +127,8 @@ namespace RacingGame
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			textureTest = Content.Load<Texture2D>("testparticleTexture");
+
+			DebugFont = Content.Load<SpriteFont>("DebigFont");
 
 			// TODO: use this.Content to load your game content here
 			// ex:
@@ -142,7 +142,7 @@ namespace RacingGame
 		/// <param name="gameTime">This is the gameTime object you can use to get the time since last frame.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			deltaTimeInSeconds = gameTime.ElapsedGameTime.Seconds;
+			deltaTimeInSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 			Input.Update(); // Updates the state of the input library
 
@@ -163,8 +163,21 @@ namespace RacingGame
 
 			particleManager.physicsTick(deltaTimeInSeconds);
 
-			
+#if DEBUG
+			//camera translation
+			if(inputHandler.isKeyDown((int)Actions.translateForward)) { cameraPlayer1.deltaMove(Vector3.Forward  * deltaTimeInSeconds * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateBack))    { cameraPlayer1.deltaMove(Vector3.Backward * deltaTimeInSeconds * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateLeft))    { cameraPlayer1.deltaMove(Vector3.Left     * deltaTimeInSeconds * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateRight))   { cameraPlayer1.deltaMove(Vector3.Right    * deltaTimeInSeconds * 2f ); }
 
+			//camera rotation
+			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(0, deltaTimeInSeconds, 0)  * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(0, -deltaTimeInSeconds, 0) * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(-deltaTimeInSeconds, 0, 0) * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(deltaTimeInSeconds, 0, 0)  * 2f; }
+#else
+
+#endif
 
 			base.Update(gameTime);
 		}
@@ -179,7 +192,7 @@ namespace RacingGame
 			rasterizer.CullMode = CullMode.None;
 			GraphicsDevice.RasterizerState = rasterizer;
 
-			GraphicsDevice.Clear(Color.LightCyan);
+			GraphicsDevice.Clear(Color.Black);
 			BasicEffect basicEffect = new BasicEffect(GraphicsDevice);
 
 			basicEffect.EmissiveColor = Vector3.One;
@@ -195,6 +208,9 @@ namespace RacingGame
 			// TODO: Add your drawing code here
 
 			particleManager.draw(GraphicsDevice, basicEffect);
+
+			_spriteBatch.DrawString(DebugFont, cameraPlayer1.rotation.ToString(), new Vector2(10, 10), Color.White);
+			_spriteBatch.DrawString(DebugFont, cameraPlayer1.position.ToString(), new Vector2(10, 100), Color.GreenYellow);
 			
 			_spriteBatch.End();
 
