@@ -57,8 +57,10 @@ namespace ParticleClass
     {
         #region parameters
         Texture2D texture;
-        public Vector3 position {get { return quad.position; } set { quad.position = value; }} 
-        public Vector3 rotation {get { return quad.rotation; } set { quad.rotation = value; }}  //in radians: rotation around the x, y, and z axies  
+        public Vector3 position {get { return quad.position; } set { quad.position = value; calculateWorldMatrix(); }} 
+        public Vector3 rotation {get { return quad.rotation; } set { quad.rotation = value; calculateWorldMatrix(); }}  //in radians: rotation around the x, y, and z axies  
+        private Matrix worldMatrix;
+
         public Vector3 acceleration;
         float scale {get { return quad.scale; } set { quad.scale = value; }}
 
@@ -77,6 +79,8 @@ namespace ParticleClass
 
         public void draw(Effect effect, GraphicsDevice graphicsDevice)
         {
+            effect.Parameters["World"].SetValue(worldMatrix);
+
             foreach(EffectTechnique technique in effect.Techniques)
             {
                 foreach(EffectPass pass in technique.Passes)
@@ -86,6 +90,11 @@ namespace ParticleClass
                     graphicsDevice.DrawUserPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, quad.vertices, 0, 2);
                 }
             }
+        }
+
+        private void calculateWorldMatrix()
+        {
+            this.worldMatrix = Matrix.CreateFromYawPitchRoll(quad.rotation.X, rotation.Y, rotation.Z) * Matrix.CreateTranslation(quad.position);
         }
     }
 }

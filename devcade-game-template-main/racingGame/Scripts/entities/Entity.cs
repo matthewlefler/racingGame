@@ -12,8 +12,14 @@ namespace EntityClass
     {
 
     #region parameters
-        internal Vector3 position;
-        internal Vector3 rotation;
+        internal Vector3 _position;
+        public Vector3 position { get{ return _position; } set{ _position = value; calculateWorldMatrix(); }}
+
+        internal Vector3 originPoint = Vector3.Zero;
+
+        internal Vector3 _rotation { get{ return _rotation; } set{ _rotation = value; calculateWorldMatrix(); }}
+        public  Vector3 rotation;
+        internal Matrix worldMatrix;
 
         internal ModelMesh mesh;
     #endregion
@@ -33,6 +39,8 @@ namespace EntityClass
 
         public virtual void draw(Effect effect)
         {
+            effect.Parameters["World"].SetValue(worldMatrix);
+
             foreach(EffectTechnique technique in effect.Techniques)
             {
                 foreach(EffectPass pass in technique.Passes)
@@ -42,6 +50,11 @@ namespace EntityClass
                     mesh.Draw();
                 }
             }
+        }
+
+        private void calculateWorldMatrix()
+        {
+            this.worldMatrix = Matrix.CreateTranslation(-originPoint) * Matrix.CreateFromYawPitchRoll(_rotation.X, _rotation.Y, _rotation.Z) / Matrix.CreateTranslation(-originPoint) * Matrix.CreateTranslation(this._position);
         }
     }
 

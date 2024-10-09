@@ -15,7 +15,8 @@ namespace RacingGame
 {
 	public class Game1 : Game
 	{
-		private SpriteFont DebugFont; 
+		private static SpriteFont DebugFont; 
+		private static Model testModel;
 
 		private GraphicsDeviceManager _graphics;
 		private static SpriteBatch _spriteBatch;
@@ -129,6 +130,7 @@ namespace RacingGame
 			textureTest = Content.Load<Texture2D>("testparticleTexture");
 
 			DebugFont = Content.Load<SpriteFont>("DebigFont");
+			testModel = Content.Load<Model>("Cube");
 
 			// TODO: use this.Content to load your game content here
 			// ex:
@@ -206,6 +208,8 @@ namespace RacingGame
 			// Batches all the draw calls for this frame, and then performs them all at once
 			_spriteBatch.Begin();
 			// TODO: Add your drawing code here
+
+			testModel.Draw(Matrix.Identity, cameraPlayer1.viewMatrix, cameraPlayer1.projectionMatrix);
 
 			particleManager.draw(GraphicsDevice, basicEffect);
 
