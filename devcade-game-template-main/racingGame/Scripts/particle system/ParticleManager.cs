@@ -18,6 +18,9 @@ namespace ParticleManagerClass
         List<Particle> particles;
         public int particlesLength { get {return particles.Count; } private set {} }
 
+
+        float gravity = 4.0f;
+
         #endregion
 
         public ParticleManager()
@@ -37,16 +40,17 @@ namespace ParticleManagerClass
         {
             for(int i = 0; i < particles.Count; i++)
             {
-                particles[i].position += particles[i].acceleration;
+                particles[i].position += particles[i].velocity;
+                particles[i].velocity += particles[i].acceleration;
 
                 particles[i].acceleration.X *= 0.2f * frameTimeInSeconds;
                 particles[i].acceleration.Z *= 0.2f * frameTimeInSeconds;
 
-                particles[i].acceleration.Y += 9.8f * frameTimeInSeconds;
+                particles[i].acceleration.Y = 0 * gravity * frameTimeInSeconds;
 
                 particles[i].lifeTime += frameTimeInSeconds;
 
-                if(particles[i].lifeTime > 10f)
+                if(particles[i].lifeTime > 5f)
                 {
                     particles.Remove(particles[i]);
                     i--;
@@ -59,23 +63,23 @@ namespace ParticleManagerClass
             this.particles.Add(particle);
         }
 
-        public void addParticlesFromPositionsRotationsAccelerations(Vector3[] positions, Vector3[] rotations, Vector3[] accelerations, Texture2D texture, float scale)
+        public void addParticlesFromPositionsRotationsAccelerations(Vector3[] positions, Vector3[] rotations, Vector3[] velocities, Vector3[] accelerations, Texture2D texture, float scale)
         {
-            if(positions.Length != rotations.Length || rotations.Length != accelerations.Length || positions.Length != accelerations.Length)
+            if(positions.Length != rotations.Length || positions.Length != accelerations.Length || positions.Length != velocities.Length)
             {
-                throw new ArgumentException("array position and array rotation and array acceleration are not of same length");
+                throw new ArgumentException("array position and array rotation and array acceleration and array acceleration are not of same length");
             }
             for(int i = 0; i < positions.Length; i++)
             {
-                particles.Add(new Particle(texture, positions[i], rotations[i], scale, accelerations[i]));
+                particles.Add(new Particle(texture, positions[i], rotations[i], scale, velocities[i], accelerations[i]));
             }
         }
 
-        public void addParticlesFromPositions(Vector3[] positions, Vector3 rotation, Vector3 acceleration, Texture2D texture, float scale)
+        public void addParticlesFromPositions(Vector3[] positions, Vector3 rotation, Vector3 velocity, Vector3 acceleration, Texture2D texture, float scale)
         {
             foreach(Vector3 position in positions)
             {
-                particles.Add(new Particle(texture, position, rotation, scale, acceleration));
+                particles.Add(new Particle(texture, position, rotation, scale, velocity, acceleration));
             }
         }
     }

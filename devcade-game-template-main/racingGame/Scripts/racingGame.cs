@@ -9,6 +9,7 @@ using ParticleManagerClass;
 using ParticleClass;
 using input;
 using System.Collections.Generic;
+using System;
 
 // MAKE SURE YOU RENAME ALL PROJECT FILES FROM DevcadeGame TO YOUR YOUR GAME NAME
 namespace RacingGame
@@ -16,7 +17,6 @@ namespace RacingGame
 	public class Game1 : Game
 	{
 		private static SpriteFont DebugFont; 
-		private static Model testModel;
 
 		private GraphicsDeviceManager _graphics;
 		private static SpriteBatch _spriteBatch;
@@ -32,6 +32,8 @@ namespace RacingGame
 			translateBack,
 			translateLeft,
 			translateRight,
+			translateUp,
+			translateDown,
 			rotateUp,
 			rotateDown,
 			rotateLeft,
@@ -40,6 +42,8 @@ namespace RacingGame
 
 
 		private static Texture2D textureTest;
+
+		private static Random random;
 
 		
 		/// <summary>
@@ -68,7 +72,7 @@ namespace RacingGame
 
 			// Set window size if running debug (in release it will be fullscreen)
 			#region
-#if DEBUG
+#if false
 			_graphics.PreferredBackBufferWidth = 420;
 			_graphics.PreferredBackBufferHeight = 980;
 			_graphics.ApplyChanges();
@@ -85,11 +89,45 @@ namespace RacingGame
 
 			particleManager = new ParticleManager();
 
-			cameraPlayer1 = new Camera(new Vector3(0, 0, -10), Vector3.Zero, _graphics);
+			cameraPlayer1 = new Camera(new Vector3(0, 0, 40), Vector3.Zero, _graphics);
+
+			random = new Random(Seed: 1);
 
 
 
-			#region userInputKeybindCreation
+#region userInputKeybindCreation
+
+#if DEBUG
+
+			Dictionary<int, inputKey> actionToKeyInput = new Dictionary<int, inputKey>();
+			
+			actionToKeyInput.Add((int) Actions.translateForward, new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.W} ));
+			actionToKeyInput.Add((int) Actions.translateBack,    new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.S} ));
+			actionToKeyInput.Add((int) Actions.translateLeft,    new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.A} ));
+			actionToKeyInput.Add((int) Actions.translateRight,   new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.D} ));
+			actionToKeyInput.Add((int) Actions.translateUp,      new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.E} ));
+			actionToKeyInput.Add((int) Actions.translateDown,    new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Q} ));
+
+			actionToKeyInput.Add((int) Actions.rotateUp,         new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Up} ));
+			actionToKeyInput.Add((int) Actions.rotateDown,       new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Down} ));
+			actionToKeyInput.Add((int) Actions.rotateLeft,       new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Left} ));
+			actionToKeyInput.Add((int) Actions.rotateRight,      new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Right} ));
+			
+
+			Dictionary<int, string> actionToString = new Dictionary<int, string>();
+			
+			actionToString.Add((int) Actions.translateForward, "translate forward");
+			actionToString.Add((int) Actions.translateBack,    "translate back");
+			actionToString.Add((int) Actions.translateLeft,    "translate left");
+			actionToString.Add((int) Actions.translateRight,   "translate right");
+			actionToString.Add((int) Actions.translateUp,      "translate up");
+			actionToString.Add((int) Actions.translateDown,    "translate down");
+
+			actionToString.Add((int) Actions.rotateUp,         "rotate up");
+			actionToString.Add((int) Actions.rotateDown, 	   "rotate down");
+			actionToString.Add((int) Actions.rotateLeft,       "rotate left");
+			actionToString.Add((int) Actions.rotateRight,      "rotate right");
+#else
 
 			Dictionary<int, inputKey> actionToKeyInput = new Dictionary<int, inputKey>();
 			
@@ -113,9 +151,11 @@ namespace RacingGame
 			actionToString.Add((int) Actions.rotateLeft,       "rotate left");
 			actionToString.Add((int) Actions.rotateRight,      "rotate right");
 
+#endif
+
 			inputHandler = new InputHandler(actionToKeyInput, actionToString);
 
-			#endregion
+#endregion
 
 			base.Initialize();
 		}
@@ -127,24 +167,25 @@ namespace RacingGame
 		{
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			textureTest = Content.Load<Texture2D>("testparticleTexture");
+			textureTest = Content.Load<Texture2D>("uvTexture");
 
 			DebugFont = Content.Load<SpriteFont>("DebigFont");
-			testModel = Content.Load<Model>("Cube");
 
 			// TODO: use this.Content to load your game content here
 			// ex:
 			// texture = Content.Load<Texture2D>("fileNameWithoutExtension");
 		}
 
-		static float deltaTimeInSeconds;
+		static float deltaTime;
+		static float tempParticleTime = 100f;
 		/// <summary>
 		/// Your main update loop. This runs once every frame, over and over.
 		/// </summary>
 		/// <param name="gameTime">This is the gameTime object you can use to get the time since last frame.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			deltaTimeInSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+			deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+			tempParticleTime += deltaTime;
 
 			Input.Update(); // Updates the state of the input library
 
@@ -160,23 +201,28 @@ namespace RacingGame
 
 			// TODO: Add your update logic here
 
+			if(tempParticleTime > 2f)
+			{
+				tempParticleTime = 0f;
+				particleManager.addParticle(new Particle(textureTest, Vector3.Up * 1f, Vector3.Zero, 1f, Vector3.Up, Vector3.Up * 1.0f + new Vector3(2f * ((float)random.NextDouble() - 0.5f),0,0)));
+			}
 
-			particleManager.addParticle(new Particle(textureTest, Vector3.Up * 10f, Vector3.Zero, 1f, Vector3.Up * 2f));
-
-			particleManager.physicsTick(deltaTimeInSeconds);
+			particleManager.physicsTick(deltaTime);
 
 #if DEBUG
 			//camera translation
-			if(inputHandler.isKeyDown((int)Actions.translateForward)) { cameraPlayer1.deltaMove(Vector3.Forward  * deltaTimeInSeconds * 2f ); }
-			if(inputHandler.isKeyDown((int)Actions.translateBack))    { cameraPlayer1.deltaMove(Vector3.Backward * deltaTimeInSeconds * 2f ); }
-			if(inputHandler.isKeyDown((int)Actions.translateLeft))    { cameraPlayer1.deltaMove(Vector3.Left     * deltaTimeInSeconds * 2f ); }
-			if(inputHandler.isKeyDown((int)Actions.translateRight))   { cameraPlayer1.deltaMove(Vector3.Right    * deltaTimeInSeconds * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateForward)) { cameraPlayer1.deltaMove(Vector3.Forward  * deltaTime * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateBack))    { cameraPlayer1.deltaMove(Vector3.Backward * deltaTime * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateLeft))    { cameraPlayer1.deltaMove(Vector3.Left     * deltaTime * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateRight))   { cameraPlayer1.deltaMove(Vector3.Right    * deltaTime * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateUp))      { cameraPlayer1.deltaMove(Vector3.Up       * deltaTime * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateDown))    { cameraPlayer1.deltaMove(Vector3.Down     * deltaTime * 2f ); }
 
 			//camera rotation
-			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(0, deltaTimeInSeconds, 0)  * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(0, -deltaTimeInSeconds, 0) * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(-deltaTimeInSeconds, 0, 0) * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(deltaTimeInSeconds, 0, 0)  * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0)  * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0) * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0) * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(deltaTime, 0, 0)  * 2f; }
 #else
 
 #endif
@@ -194,27 +240,28 @@ namespace RacingGame
 			rasterizer.CullMode = CullMode.None;
 			GraphicsDevice.RasterizerState = rasterizer;
 
-			GraphicsDevice.Clear(Color.Black);
+			GraphicsDevice.Clear(Color.LightBlue);
 			BasicEffect basicEffect = new BasicEffect(GraphicsDevice);
 
-			basicEffect.EmissiveColor = Vector3.One;
 			basicEffect.TextureEnabled = true;
-			basicEffect.AmbientLightColor = Vector3.One;
 			basicEffect.LightingEnabled = true;
+
+			basicEffect.EnableDefaultLighting();
 
 			basicEffect.View = cameraPlayer1.viewMatrix;
 			basicEffect.Projection = cameraPlayer1.projectionMatrix;
+			basicEffect.Texture = textureTest;
 			
 			// Batches all the draw calls for this frame, and then performs them all at once
 			_spriteBatch.Begin();
 			// TODO: Add your drawing code here
 
-			testModel.Draw(Matrix.Identity, cameraPlayer1.viewMatrix, cameraPlayer1.projectionMatrix);
-
 			particleManager.draw(GraphicsDevice, basicEffect);
 
-			_spriteBatch.DrawString(DebugFont, cameraPlayer1.rotation.ToString(), new Vector2(10, 10), Color.White);
-			_spriteBatch.DrawString(DebugFont, cameraPlayer1.position.ToString(), new Vector2(10, 100), Color.GreenYellow);
+			_spriteBatch.DrawString(DebugFont, cameraPlayer1.rotation.ToString(), new Vector2(10, 10), Color.DarkOrange);
+			_spriteBatch.DrawString(DebugFont, cameraPlayer1.position.ToString(), new Vector2(10, 100), Color.DarkGreen);
+
+			_spriteBatch.Draw(textureTest, new Rectangle(1000, 10, 100, 100), Color.White);
 			
 			_spriteBatch.End();
 
