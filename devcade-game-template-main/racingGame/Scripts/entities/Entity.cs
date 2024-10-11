@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace EntityClass
 {
-    public class Entity
+    public abstract class Entity
     {
 
     #region parameters
@@ -17,16 +17,13 @@ namespace EntityClass
 
         internal Vector3 originPoint = Vector3.Zero;
 
-        internal Vector3 _rotation { get{ return _rotation; } set{ _rotation = value; calculateWorldMatrix(); }}
-        public  Vector3 rotation;
+        internal Vector3 _rotation;
+        public  Vector3 rotation { get{ return _rotation; } set{ _rotation = value; calculateWorldMatrix(); }}
         internal Matrix worldMatrix;
-
-        internal ModelMesh mesh;
     #endregion
 
-        public Entity(Vector3 position, Vector3 rotation, ModelMesh mesh)
+        public Entity(Vector3 position, Vector3 rotation)
         {
-            this.mesh = mesh;
             this.position = position;
             this.rotation = rotation;
         }
@@ -37,28 +34,17 @@ namespace EntityClass
             this.rotation += rotation;
         }
 
-        public virtual void draw(Effect effect)
-        {
-            effect.Parameters["World"].SetValue(worldMatrix);
+        public abstract void draw(Effect effect);
 
-            foreach(EffectTechnique technique in effect.Techniques)
-            {
-                foreach(EffectPass pass in technique.Passes)
-                {
-                    pass.Apply();
-
-                    mesh.Draw();
-                }
-            }
-        }
+        public abstract void tick(float frameTimeInSeconds);
 
         private void calculateWorldMatrix()
         {
-            this.worldMatrix = Matrix.CreateTranslation(-originPoint) * Matrix.CreateFromYawPitchRoll(_rotation.X, _rotation.Y, _rotation.Z) / Matrix.CreateTranslation(-originPoint) * Matrix.CreateTranslation(this._position);
+            this.worldMatrix = Matrix.CreateTranslation(-originPoint) * Matrix.CreateFromYawPitchRoll(_rotation.X, _rotation.Y, _rotation.Z) * Matrix.CreateTranslation(originPoint) * Matrix.CreateTranslation(this._position);
         }
     }
 
-    class CollisionEntity : Entity
+    public abstract class CollisionEntity
     {
     
     #region parameters
@@ -66,13 +52,39 @@ namespace EntityClass
 
         BoundingSphere boundingSphere;
 
-    #endregion
+        internal Vector3 _position;
+        public Vector3 position { get{ return _position; } set{ _position = value; calculateWorldMatrix(); }}
 
-        public CollisionEntity(Vector3 position, Vector3 rotation, ModelMesh mesh, BoundingSphere boundingSphere, bool doCollision) : base(position, rotation, mesh)
+        internal Vector3 originPoint = Vector3.Zero;
+
+        internal Vector3 _rotation { get{ return _rotation; } set{ _rotation = value; calculateWorldMatrix(); }}
+        public  Vector3 rotation;
+        internal Matrix worldMatrix;
+    #endregion        
+
+        private void calculateWorldMatrix()
+        {
+            this.worldMatrix = Matrix.CreateTranslation(-originPoint) * Matrix.CreateFromYawPitchRoll(_rotation.X, _rotation.Y, _rotation.Z) * Matrix.CreateTranslation(originPoint) * Matrix.CreateTranslation(this._position);
+        }
+
+        public CollisionEntity(Vector3 position, Vector3 rotation, BoundingSphere boundingSphere, bool doCollision)
         {
             this.doCollision = doCollision; 
             this.boundingSphere = boundingSphere;
+            this.position = position;
+            this.rotation = rotation;
         }
+
+        /// <summary>
+        /// what to draw
+        /// </summary>
+        /// <param name="effect"></param>
+        public abstract void draw(Effect effect);
+
+        /// <summary>
+        /// the things that the entity does
+        /// </summary>
+        public abstract void tick(float frameTimeInSeconds);
 
         /// <summary>
         /// will attempt a move by the given translation
@@ -83,35 +95,48 @@ namespace EntityClass
         /// <param name="otherEntities"></param> the other entities to do collision checks on
         public void move(Vector3 translation, CollisionEntity[] otherEntities)
         {
-            Vector3 unitTranslation = Vector3.Normalize(translation - this.position); //essentally the rotation of the translation
-            float moveDistance = (translation - this.position).Length(); //the amount of distance the move wants to go
-
-            float shortestDistance = moveDistance;
-
-            List<CollisionEntity> entitiesList = otherEntities.ToList<CollisionEntity>();
-            
-            foreach(CollisionEntity entity in otherEntities) 
+            if(doCollision)
             {
-                if((entity.position - this.position).Length() > moveDistance)
+                Vector3 unitTranslation = Vector3.Normalize(translation - this.position); //essentally the rotation of the translation
+                float moveDistance = (translation - this.position).Length(); //the amount of distance the move wants to go
+
+                float shortestDistance = moveDistance;
+
+                List<CollisionEntity> entitiesList = otherEntities.ToList<CollisionEntity>();
+
+                foreach(CollisionEntity entity in otherEntities) 
                 {
-                    continue;
+                    if(entity.doCollision == false)
+                    {
+                        continue;
+                    }
+
+                    if((entity.position - this.position).Length() > moveDistance)
+                    {
+                        continue;
+                    }
+
+                    Ray ray = new Ray(this.position, unitTranslation);
+
+                    float? distance = null;
+                    ray.Intersects(ref entity.boundingSphere, out distance);
+
+                    if(distance == null)
+                    {
+                        continue;
+                    }
+
+                    shortestDistance = distance ?? 0;
+
                 }
 
-                Ray ray = new Ray(this.position, unitTranslation);
-
-                float? distance = null;
-                ray.Intersects(ref entity.boundingSphere, out distance);
-
-                if(distance == null)
-                {
-                    continue;
-                }
-
-                shortestDistance = distance ?? 0;
-
+                this.position += unitTranslation * shortestDistance;
             }
-
-            this.position += unitTranslation * shortestDistance;
+            else
+            {
+                this.position += translation;
+            }
+            
         }
     }
 }

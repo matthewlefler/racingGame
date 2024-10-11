@@ -5,11 +5,19 @@ using Devcade;
 using System.Diagnostics;
 
 using CameraClass;
+
 using ParticleManagerClass;
 using ParticleClass;
+
+using EntityManagerClass;
+using EntityClass;
+
+using solidColorTextures;
 using input;
 using System.Collections.Generic;
 using System;
+
+using FireEffectClass;
 
 // MAKE SURE YOU RENAME ALL PROJECT FILES FROM DevcadeGame TO YOUR YOUR GAME NAME
 namespace RacingGame
@@ -20,11 +28,13 @@ namespace RacingGame
 
 		private GraphicsDeviceManager _graphics;
 		private static SpriteBatch _spriteBatch;
+		private static TextureMaker textureMaker = new TextureMaker();
 
 		private static Camera cameraPlayer1;
 
 
 		private static ParticleManager particleManager;
+		private static EntityManager entityManager;
 		private static InputHandler inputHandler;
 		private enum Actions
 		{
@@ -88,10 +98,13 @@ namespace RacingGame
 			windowSize = GraphicsDevice.Viewport.Bounds;
 
 			particleManager = new ParticleManager();
+			entityManager = new EntityManager();
 
 			cameraPlayer1 = new Camera(new Vector3(0, 0, 40), Vector3.Zero, _graphics);
 
 			random = new Random(Seed: 1);
+
+			entityManager.add(new FireEffect(particleManager, Vector3.Up, Vector3.Zero, new Vector3(2f, 0f, 2f), 2, 0, 100, _graphics.GraphicsDevice));
 
 
 
@@ -167,7 +180,7 @@ namespace RacingGame
 		{
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			textureTest = Content.Load<Texture2D>("uvTexture");
+			textureTest = Content.Load<Texture2D>("testparticleTexture");
 
 			DebugFont = Content.Load<SpriteFont>("DebigFont");
 
@@ -177,7 +190,6 @@ namespace RacingGame
 		}
 
 		static float deltaTime;
-		static float tempParticleTime = 100f;
 		/// <summary>
 		/// Your main update loop. This runs once every frame, over and over.
 		/// </summary>
@@ -185,7 +197,6 @@ namespace RacingGame
 		protected override void Update(GameTime gameTime)
 		{
 			deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-			tempParticleTime += deltaTime;
 
 			Input.Update(); // Updates the state of the input library
 
@@ -201,13 +212,8 @@ namespace RacingGame
 
 			// TODO: Add your update logic here
 
-			if(tempParticleTime > 2f)
-			{
-				tempParticleTime = 0f;
-				particleManager.addParticle(new Particle(textureTest, Vector3.Up * 1f, Vector3.Zero, 1f, Vector3.Up, Vector3.Up * 1.0f + new Vector3(2f * ((float)random.NextDouble() - 0.5f),0,0)));
-			}
-
 			particleManager.physicsTick(deltaTime);
+			entityManager.physicsTick(deltaTime);
 
 #if DEBUG
 			//camera translation
@@ -237,7 +243,7 @@ namespace RacingGame
 		protected override void Draw(GameTime gameTime)
 		{
 			RasterizerState rasterizer = new RasterizerState();
-			rasterizer.CullMode = CullMode.None;
+			rasterizer.CullMode = CullMode.CullClockwiseFace;
 			GraphicsDevice.RasterizerState = rasterizer;
 
 			GraphicsDevice.Clear(Color.LightBlue);
@@ -250,18 +256,18 @@ namespace RacingGame
 
 			basicEffect.View = cameraPlayer1.viewMatrix;
 			basicEffect.Projection = cameraPlayer1.projectionMatrix;
-			basicEffect.Texture = textureTest;
 			
 			// Batches all the draw calls for this frame, and then performs them all at once
 			_spriteBatch.Begin();
 			// TODO: Add your drawing code here
 
 			particleManager.draw(GraphicsDevice, basicEffect);
+			entityManager.draw(basicEffect);
 
 			_spriteBatch.DrawString(DebugFont, cameraPlayer1.rotation.ToString(), new Vector2(10, 10), Color.DarkOrange);
 			_spriteBatch.DrawString(DebugFont, cameraPlayer1.position.ToString(), new Vector2(10, 100), Color.DarkGreen);
 
-			_spriteBatch.Draw(textureTest, new Rectangle(1000, 10, 100, 100), Color.White);
+			_spriteBatch.Draw(textureTest, new Rectangle(500, 10, 100, 100), Color.White);
 			
 			_spriteBatch.End();
 

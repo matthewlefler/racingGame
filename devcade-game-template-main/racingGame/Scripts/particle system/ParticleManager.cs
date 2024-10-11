@@ -1,12 +1,9 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Devcade;
 using System.Collections.Generic;
 
 using ParticleClass;
-using System.ComponentModel;
-using System.Diagnostics;
 using System;
 
 namespace ParticleManagerClass
@@ -18,10 +15,8 @@ namespace ParticleManagerClass
         List<Particle> particles;
         public int particlesLength { get {return particles.Count; } private set {} }
 
-
-        float gravity = 4.0f;
-
         #endregion
+        
 
         public ParticleManager()
         {
@@ -40,13 +35,16 @@ namespace ParticleManagerClass
         {
             for(int i = 0; i < particles.Count; i++)
             {
-                particles[i].position += particles[i].velocity;
-                particles[i].velocity += particles[i].acceleration;
+                particles[i].position += particles[i].velocity * frameTimeInSeconds;
+                particles[i].velocity += particles[i].acceleration * frameTimeInSeconds;
 
-                particles[i].acceleration.X *= 0.2f * frameTimeInSeconds;
-                particles[i].acceleration.Z *= 0.2f * frameTimeInSeconds;
+                particles[i].acceleration.X -= frameTimeInSeconds * MathF.Sign(particles[i].acceleration.X);
+                particles[i].acceleration.Z -= frameTimeInSeconds * MathF.Sign(particles[i].acceleration.Y);
 
-                particles[i].acceleration.Y = 0 * gravity * frameTimeInSeconds;
+                particles[i].velocity.X -= 0.1f * frameTimeInSeconds * MathF.Sign(particles[i].velocity.X);
+                particles[i].velocity.Z -= 0.1f * frameTimeInSeconds * MathF.Sign(particles[i].velocity.Y);
+
+                particles[i].acceleration.Y -= particles[i].gravity * frameTimeInSeconds;
 
                 particles[i].lifeTime += frameTimeInSeconds;
 
@@ -63,7 +61,7 @@ namespace ParticleManagerClass
             this.particles.Add(particle);
         }
 
-        public void addParticlesFromPositionsRotationsAccelerations(Vector3[] positions, Vector3[] rotations, Vector3[] velocities, Vector3[] accelerations, Texture2D texture, float scale)
+        public void addParticlesFromPositionsRotationsAccelerations(Vector3[] positions, Vector3[] rotations, Vector3[] velocities, Vector3[] accelerations, float gravity, Texture2D texture, float scale)
         {
             if(positions.Length != rotations.Length || positions.Length != accelerations.Length || positions.Length != velocities.Length)
             {
@@ -71,15 +69,15 @@ namespace ParticleManagerClass
             }
             for(int i = 0; i < positions.Length; i++)
             {
-                particles.Add(new Particle(texture, positions[i], rotations[i], scale, velocities[i], accelerations[i]));
+                particles.Add(new Particle(texture, positions[i], rotations[i], scale, velocities[i], accelerations[i], gravity));
             }
         }
 
-        public void addParticlesFromPositions(Vector3[] positions, Vector3 rotation, Vector3 velocity, Vector3 acceleration, Texture2D texture, float scale)
+        public void addParticlesFromPositions(Vector3[] positions, Vector3 rotation, Vector3 velocity, Vector3 acceleration, float gravity, Texture2D texture, float scale)
         {
             foreach(Vector3 position in positions)
             {
-                particles.Add(new Particle(texture, position, rotation, scale, velocity, acceleration));
+                particles.Add(new Particle(texture, position, rotation, scale, velocity, acceleration, gravity));
             }
         }
     }

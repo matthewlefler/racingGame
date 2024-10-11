@@ -32,7 +32,7 @@ namespace CameraClass
 
         public void deltaMove(Vector3 translation)
         {
-            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(rotation.X, rotation.Y, rotation.Z);
+            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(-rotation.X, rotation.Y, rotation.Z);
             this.position += Vector3.Transform(translation * speed, rotationMatrix);
         }
 
