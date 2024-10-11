@@ -23,7 +23,7 @@ namespace solidColorTextures
 
             Texture2D newTexture = new Texture2D(graphicsDevice, width, height);
 
-            newTexture.SetData<Color>(colors);
+            newTexture.SetData(colors);
 
             return newTexture;
         }

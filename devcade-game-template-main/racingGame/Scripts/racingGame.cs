@@ -104,7 +104,7 @@ namespace RacingGame
 
 			random = new Random(Seed: 1);
 
-			entityManager.add(new FireEffect(particleManager, Vector3.Up, Vector3.Zero, new Vector3(2f, 0f, 2f), 2, 0, 100, _graphics.GraphicsDevice));
+			entityManager.add(new FireEffect(particleManager, Vector3.Up, Vector3.Zero, new Vector3(4f, 2f, 4f), new Vector3(5f, 0f, 5f), 20f, 0f, 100f, _graphics.GraphicsDevice));
 
 
 
@@ -180,7 +180,7 @@ namespace RacingGame
 		{
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			textureTest = Content.Load<Texture2D>("testparticleTexture");
+			textureTest = textureMaker.makeTexture(Color.Red, 10, 10, GraphicsDevice); //Content.Load<Texture2D>("testparticleTexture");
 
 			DebugFont = Content.Load<SpriteFont>("DebigFont");
 
@@ -252,7 +252,7 @@ namespace RacingGame
 			basicEffect.TextureEnabled = true;
 			basicEffect.LightingEnabled = true;
 
-			basicEffect.EnableDefaultLighting();
+			basicEffect.EmissiveColor = Vector3.One;
 
 			basicEffect.View = cameraPlayer1.viewMatrix;
 			basicEffect.Projection = cameraPlayer1.projectionMatrix;

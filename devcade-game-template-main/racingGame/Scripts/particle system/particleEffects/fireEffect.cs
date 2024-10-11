@@ -15,7 +15,8 @@ namespace FireEffectClass
         ParticleManager particleManager;
         Texture2D[] textures = new Texture2D[10];
 
-        Vector3 spread;
+        Vector3 velocitySpread;
+        Vector3 positionSpread;
         Random random;
         
         float time = 0f;
@@ -24,11 +25,12 @@ namespace FireEffectClass
         float acceleration;
 
         
-        public FireEffect(ParticleManager particleManager, Vector3 rotation, Vector3 position, Vector3 spread, float velocity, float acceleration, float particlesPerSecond, GraphicsDevice graphicsDevice) : base(position, rotation)
+        public FireEffect(ParticleManager particleManager, Vector3 rotation, Vector3 position, Vector3 velocitySpread, Vector3 positionSpread, float velocity, float acceleration, float particlesPerSecond, GraphicsDevice graphicsDevice) : base(position, rotation)
         {
             this.particleManager = particleManager;
             
-            this.spread = spread;
+            this.velocitySpread = velocitySpread;
+            this.positionSpread = positionSpread;
             this.random = new Random();
             
             this.velocity = velocity;
@@ -40,9 +42,14 @@ namespace FireEffectClass
 
             float startR = 0.1f;
 
-            for(int i = 0; i < textures.Length; i++)
+            for(int i = 0; i < textures.Length/2; i++)
             {
-                textures[i] = textureMaker.makeTexture(new Color((i + startR)/(textures.Length + startR), 0f, 0f), 10, 10, graphicsDevice);
+                textures[i] = textureMaker.makeTexture(new Color(((float)i + startR)/(textures.Length/2 + startR), 0f, 0f), 50, 50, graphicsDevice);
+            }
+
+            for(int i = textures.Length/2; i < textures.Length; i++)
+            {
+                textures[i] = textureMaker.makeTexture(new Color(1f, ((float)i + startR)/(textures.Length + startR), 0f), 50, 50, graphicsDevice);
             }
         }
 
@@ -52,10 +59,11 @@ namespace FireEffectClass
 
             if(time > 1f/particlesPerSecond)
             {
-                Vector3 velocity = rotation * this.velocity + spread * ((float)random.NextDouble() - 0.5f);
-                Vector3 acceleration = rotation * this.acceleration + spread * ((float)random.NextDouble() - 0.5f);
+                Vector3 velocity =     this.rotation * this.velocity +     new Vector3(this.velocitySpread.X * ((float)random.NextDouble() - 0.5f), this.velocitySpread.Y * ((float)random.NextDouble() - 0.5f), this.velocitySpread.Z * ((float)random.NextDouble() - 0.5f));
+                Vector3 acceleration = this.rotation * this.acceleration; // + new Vector3(this.velocitySpread.X * (float)random.NextDouble() - 0.5f), this.velocitySpread.Y * ((float)random.NextDouble() - 0.5f), this.velocitySpread.Z * ((float)random.NextDouble() - 0.5f));
+                Vector3 position =     this.position +                     new Vector3(this.positionSpread.X * ((float)random.NextDouble() - 0.5f), this.positionSpread.Y * ((float)random.NextDouble() - 0.5f), this.positionSpread.Z * ((float)random.NextDouble() - 0.5f));
 
-                Particle particle = new Particle(textures[0], position, rotation, 0.1f, velocity, acceleration, 0f);
+                Particle particle = new Particle(textures[random.Next(0, textures.Length - 1)], position, rotation, 0.1f, velocity, acceleration, 0f);
                 particleManager.addParticle(particle);
                 time -= 1f/particlesPerSecond;
             }
