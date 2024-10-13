@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using EntityClass;
 using Microsoft.Xna.Framework.Input;
 using System;
+using CameraClass;
 
 namespace FireEffectClass
 {
@@ -24,10 +25,13 @@ namespace FireEffectClass
         float velocity;
         float acceleration;
 
+        Camera camera;
+
         
-        public FireEffect(ParticleManager particleManager, Vector3 rotation, Vector3 position, Vector3 velocitySpread, Vector3 positionSpread, float velocity, float acceleration, float particlesPerSecond, GraphicsDevice graphicsDevice) : base(position, rotation)
+        public FireEffect(ParticleManager particleManager, Vector3 rotation, Vector3 position, Vector3 velocitySpread, Vector3 positionSpread, float velocity, float acceleration, float particlesPerSecond, GraphicsDevice graphicsDevice, Camera camera) : base(position, rotation)
         {
             this.particleManager = particleManager;
+            this.camera = camera;
             
             this.velocitySpread = velocitySpread;
             this.positionSpread = positionSpread;
@@ -40,7 +44,7 @@ namespace FireEffectClass
 
             TextureMaker textureMaker = new TextureMaker();
 
-            float startR = 0.1f;
+            float startR = 7f;
 
             for(int i = 0; i < textures.Length/2; i++)
             {
@@ -57,19 +61,19 @@ namespace FireEffectClass
         {
             time += frameTimeInSeconds;
 
-            if(time > 1f/particlesPerSecond)
+            while(time > 1f/particlesPerSecond)
             {
                 Vector3 velocity =     this.rotation * this.velocity +     new Vector3(this.velocitySpread.X * ((float)random.NextDouble() - 0.5f), this.velocitySpread.Y * ((float)random.NextDouble() - 0.5f), this.velocitySpread.Z * ((float)random.NextDouble() - 0.5f));
                 Vector3 acceleration = this.rotation * this.acceleration; // + new Vector3(this.velocitySpread.X * (float)random.NextDouble() - 0.5f), this.velocitySpread.Y * ((float)random.NextDouble() - 0.5f), this.velocitySpread.Z * ((float)random.NextDouble() - 0.5f));
                 Vector3 position =     this.position +                     new Vector3(this.positionSpread.X * ((float)random.NextDouble() - 0.5f), this.positionSpread.Y * ((float)random.NextDouble() - 0.5f), this.positionSpread.Z * ((float)random.NextDouble() - 0.5f));
 
-                Particle particle = new Particle(textures[random.Next(0, textures.Length - 1)], position, rotation, 0.1f, velocity, acceleration, 0f);
+                Particle particle = new Particle(textures[random.Next(0, textures.Length - 1)], position, camera.rotation, 0.1f, velocity, acceleration, 0f);
                 particleManager.addParticle(particle);
                 time -= 1f/particlesPerSecond;
             }
         }
 
-        public override void draw(Effect effect)
+        public override void draw(BasicEffect effect)
         {
             //skip this as the particle manager will handle drawing the particles 
             return;

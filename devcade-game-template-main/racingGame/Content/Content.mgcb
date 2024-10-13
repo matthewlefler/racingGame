@@ -32,6 +32,18 @@
 /processorParam:TextureFormat=Color
 /build:testparticleTexture.jpg
 
+#begin tireTexture.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:tireTexture.jpg
+
 #begin uvTexture.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -43,4 +55,7 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:uvTexture.jpg
+
+#begin whitrabt.ttf
+/copy:whitrabt.ttf
 

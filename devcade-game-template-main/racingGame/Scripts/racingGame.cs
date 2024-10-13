@@ -18,6 +18,10 @@ using System.Collections.Generic;
 using System;
 
 using FireEffectClass;
+using CubeClass;
+using CylinderClass;
+using WheelClass;
+using System.IO;
 
 // MAKE SURE YOU RENAME ALL PROJECT FILES FROM DevcadeGame TO YOUR YOUR GAME NAME
 namespace RacingGame
@@ -48,6 +52,8 @@ namespace RacingGame
 			rotateDown,
 			rotateLeft,
 			rotateRight,
+
+			boost,
 		}
 
 
@@ -82,8 +88,8 @@ namespace RacingGame
 
 			// Set window size if running debug (in release it will be fullscreen)
 			#region
-#if false
-			_graphics.PreferredBackBufferWidth = 420;
+#if DEBUG
+			_graphics.PreferredBackBufferWidth = 1420;
 			_graphics.PreferredBackBufferHeight = 980;
 			_graphics.ApplyChanges();
 #else
@@ -104,7 +110,8 @@ namespace RacingGame
 
 			random = new Random(Seed: 1);
 
-			entityManager.add(new FireEffect(particleManager, Vector3.Up, Vector3.Zero, new Vector3(4f, 2f, 4f), new Vector3(5f, 0f, 5f), 20f, 0f, 100f, _graphics.GraphicsDevice));
+			//entityManager.add(new FireEffect(particleManager, Vector3.Right, Vector3.Zero, new Vector3(4f, 2f, 4f), new Vector3(5f, 4f, 5f), 320f, 0f, 100f, _graphics.GraphicsDevice, cameraPlayer1));
+			
 
 
 
@@ -125,6 +132,8 @@ namespace RacingGame
 			actionToKeyInput.Add((int) Actions.rotateDown,       new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Down} ));
 			actionToKeyInput.Add((int) Actions.rotateLeft,       new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Left} ));
 			actionToKeyInput.Add((int) Actions.rotateRight,      new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.Right} ));
+
+			actionToKeyInput.Add((int) Actions.boost,            new inputKey( new (int?, Input.ArcadeButtons?)[] {  }, new Keys?[] {Keys.LeftShift} ));
 			
 
 			Dictionary<int, string> actionToString = new Dictionary<int, string>();
@@ -140,6 +149,8 @@ namespace RacingGame
 			actionToString.Add((int) Actions.rotateDown, 	   "rotate down");
 			actionToString.Add((int) Actions.rotateLeft,       "rotate left");
 			actionToString.Add((int) Actions.rotateRight,      "rotate right");
+
+			actionToString.Add((int) Actions.boost,          "Boost");
 #else
 
 			Dictionary<int, inputKey> actionToKeyInput = new Dictionary<int, inputKey>();
@@ -180,10 +191,14 @@ namespace RacingGame
 		{
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			textureTest = textureMaker.makeTexture(Color.Red, 10, 10, GraphicsDevice); //Content.Load<Texture2D>("testparticleTexture");
+			textureTest = Content.Load<Texture2D>("uvTexture");
 
 			DebugFont = Content.Load<SpriteFont>("DebigFont");
+			Texture2D tireTexure = Content.Load<Texture2D>("tireTexture");
 
+			entityManager.add(new CollisionCube(10,1,10, Vector3.Zero, Vector3.Zero, textureTest, GraphicsDevice));
+			//entityManager.add(new Cylinder(2f, 1f, 30, new Vector3(0,10,0), Vector3.Zero, textureTest, GraphicsDevice));
+			entityManager.add(new Wheel(new Vector3(0, 5, 0), Vector3.Zero, tireTexure, GraphicsDevice));
 			// TODO: use this.Content to load your game content here
 			// ex:
 			// texture = Content.Load<Texture2D>("fileNameWithoutExtension");
@@ -227,8 +242,11 @@ namespace RacingGame
 			//camera rotation
 			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0)  * 2f; }
 			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0) * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0) * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(deltaTime, 0, 0)  * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(deltaTime, 0, 0) * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0)  * 2f; }
+
+			//other camera movement modifiers
+			if(inputHandler.isKeyDown((int)Actions.boost))            { cameraPlayer1.speed = 6f; } else { cameraPlayer1.speed = 2f; }
 #else
 
 #endif
@@ -245,8 +263,9 @@ namespace RacingGame
 			RasterizerState rasterizer = new RasterizerState();
 			rasterizer.CullMode = CullMode.CullClockwiseFace;
 			GraphicsDevice.RasterizerState = rasterizer;
+			GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
-			GraphicsDevice.Clear(Color.LightBlue);
+			GraphicsDevice.Clear(Color.LightCyan);
 			BasicEffect basicEffect = new BasicEffect(GraphicsDevice);
 
 			basicEffect.TextureEnabled = true;

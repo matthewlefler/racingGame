@@ -1,7 +1,4 @@
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Devcade;
 using System.Collections.Generic;
 using EntityClass;
 
@@ -17,7 +14,7 @@ namespace EntityManagerClass
 
         }
 
-        public void draw(Effect effect)
+        public void draw(BasicEffect effect)
         {
             foreach(Entity entity in entities)
             {
@@ -39,7 +36,7 @@ namespace EntityManagerClass
 
             foreach(CollisionEntity entity in physicalEntities)
             {
-                entity.tick(frameTimeInSeconds);
+                entity.tick(frameTimeInSeconds, this.physicalEntities.ToArray());
             }
         }
 
