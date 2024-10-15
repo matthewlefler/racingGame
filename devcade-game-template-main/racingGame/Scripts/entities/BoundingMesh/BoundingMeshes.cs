@@ -79,14 +79,17 @@ namespace BoundingMeshesClass
 
     public class BoundingMesh 
     {
+        private Face[] orignialFaces;
         public Face[] faces;
+
+        private BoundingBox orignalBox;
         public BoundingBox box {get; private set;}
 
         private Vector3 _position;
-        public Vector3 position { get { return _position; } set { reCalcTranslation(value); _position = value; } }
+        public Vector3 position { get { return _position; } set { _position = value; reCalcTranslation(); } }
 
         private Vector3 _rotation;
-        public Vector3 rotation { get { return _rotation; } set { reCalcRotation(value); _rotation = value; } }
+        public Vector3 rotation { get { return _rotation; } set { _rotation = value; reCalcRotation(); } }
 
         public Vector3 localUp = Vector3.Up;
         public Vector3 localForward = Vector3.Forward;
@@ -97,6 +100,8 @@ namespace BoundingMeshesClass
             this._rotation = rotation;
 
             Debug.Assert(faces.Length > 0);
+
+            this.orignialFaces = faces;
 
             foreach(Face face in faces)
             {
@@ -139,38 +144,32 @@ namespace BoundingMeshesClass
             }
 
             this.box = new BoundingBox(min, max);
+            this.orignalBox = new BoundingBox(min, max);
         }
 
-        private void reCalcTranslation(Vector3 value)
+        private void reCalcTranslation()
         {
-            //Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(this._rotation.X, this._rotation.Y, this._rotation.Z);
-
-            Vector3 translation = value - this._position;
-
-            foreach(Face face in faces)
+            for(int i = 0; i < faces.Length; i++)
             {
-                face.position += translation;
+                faces[i].position = this._position + orignialFaces[i].position;
             }
 
-            this.box = new BoundingBox(this.box.Min + translation, this.box.Max + translation);
+            this.box = new BoundingBox(this.orignalBox.Min + this._position, this.orignalBox.Max + this._position);
         }
 
-        private void reCalcRotation(Vector3 newRotation)
+        private void reCalcRotation()
         {
-            Vector3 deltaRotation = newRotation - this._rotation;
-            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(deltaRotation.Y, deltaRotation.X, deltaRotation.Z);
+            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(this._rotation.Y, this._rotation.X, this._rotation.Z);
 
-            foreach(Face face in faces)
+            for(int i = 0; i < faces.Length; i++)
             {
-                face.position -= this.position;
-                face.position = Vector3.Transform(face.position, rotationMatrix);
-                face.position += this.position;
+                faces[i].position = Vector3.Transform(orignialFaces[i].position, rotationMatrix) + this._position;
 
-                face.normal = Vector3.Transform(face.normal, rotationMatrix);
+                faces[i].normal = Vector3.Transform(orignialFaces[i].normal, rotationMatrix);
             }
 
-            this.localUp = Vector3.Transform(this.localUp, rotationMatrix);
-            this.localForward = Vector3.Transform(this.localForward, rotationMatrix);
+            this.localUp = Vector3.Transform(Vector3.Up, rotationMatrix);
+            this.localForward = Vector3.Transform(Vector3.Forward, rotationMatrix);
 
             Vector3 max = faces[0].position;
             Vector3 min = faces[0].position;

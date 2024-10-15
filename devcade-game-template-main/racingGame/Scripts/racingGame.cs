@@ -256,16 +256,16 @@ namespace RacingGame
 			if(inputHandler.isKeyDown((int)Actions.translateUp))      { cameraPlayer1.deltaMove(Vector3.Up       * deltaTime * 2f ); }
 			if(inputHandler.isKeyDown((int)Actions.translateDown))    { cameraPlayer1.deltaMove(Vector3.Down     * deltaTime * 2f ); }
 
-			//camera rotation
-			// if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(deltaTime, 0, 0)  * 2f; }
-			// if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0) * 2f; }
-			// if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0) * 2f; }
-			// if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0)  * 2f; }
+			// camera rotation
+			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(deltaTime, 0, 0)  * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0) * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0) * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0)  * 2f; }
 
-			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { wheel.rotation += Vector3.Forward; }
-			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { wheel.rotation += Vector3.Backward; }
-			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { wheel.rotation += Vector3.Left; }
-			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { wheel.rotation += Vector3.Right; }
+			// if(inputHandler.isKeyDown((int)Actions.rotateUp))         { wheel.rotation += Vector3.Forward; }
+			// if(inputHandler.isKeyDown((int)Actions.rotateDown))       { wheel.rotation += Vector3.Backward; }
+			// if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { wheel.rotation += Vector3.Left; }
+			// if(inputHandler.isKeyDown((int)Actions.rotateRight))      { wheel.rotation += Vector3.Right; }
 
 			//other camera movement modifiers
 			if(inputHandler.isKeyDown((int)Actions.boost))            { cameraPlayer1.speed = 8f; } else { cameraPlayer1.speed = 2f; }

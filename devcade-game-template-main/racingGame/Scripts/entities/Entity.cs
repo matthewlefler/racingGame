@@ -152,6 +152,7 @@ namespace EntityClass
                 {
                     Vector3 offset = rightVector * vertex.X + upVector * vertex.Y;
                     Vector3 vertexPosition = face.position + offset;
+                    Debug.WriteLine(vertexPosition + " | " + face.position);
 
                     vertices.Add(new VertexPositionColorTexture(vertexPosition + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
                     vertices.Add(new VertexPositionColorTexture(vertexPosition + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
