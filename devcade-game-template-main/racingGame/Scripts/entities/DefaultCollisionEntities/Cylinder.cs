@@ -5,11 +5,11 @@ using QuadClass;
 using CircleClass;
 using System;
 using System.Diagnostics;
-
+using BoundingMeshesClass;
 
 namespace CylinderClass
 {
-    class CollisionCylinder : CollisionEntity
+    public class CollisionCylinder : CollisionEntity
     {
         Quad[] quads;
         Circle[] circles = new Circle[2];
@@ -17,14 +17,14 @@ namespace CylinderClass
         GraphicsDevice graphicsDevice;
         Texture2D texture;
 
-        public CollisionCylinder(float height, float radius, int resolution, Vector3 position, Vector3 rotation, Texture2D texture, GraphicsDevice graphicsDevice) : base(position, rotation, new CollisionMesh(new BoundingSphere(position, radius), position), true)
+        public CollisionCylinder(float height, float radius, int resolution, Vector3 position, Vector3 rotation, Texture2D texture, GraphicsDevice graphicsDevice) : base(position, rotation, BasicBoundingMeshes.BoundingCylinder(resolution, height, radius, 1f, position), true)
         {
             this.graphicsDevice = graphicsDevice;
             this.texture = texture;
 
             quads = new Quad[resolution];
 
-            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(rotation.X, rotation.Y, rotation.Z);
+            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
 
             float anglePer = MathHelper.TwoPi/quads.Length;
 
@@ -52,8 +52,8 @@ namespace CylinderClass
 
         public override void draw(BasicEffect effect)
         {
-            effect.Parameters["World"].SetValue(worldMatrix);
-            effect.Parameters["Texture"].SetValue(texture);
+            effect.World = worldMatrix;
+            effect.Texture = texture;
 
             foreach(EffectTechnique technique in effect.Techniques)
             {
@@ -72,6 +72,10 @@ namespace CylinderClass
                     }
                 }
             }
+
+#if DEBUG
+            drawBoundingMesh(effect, graphicsDevice);
+#endif
         }
 
         public override void tick(float frameTimeInSeconds, CollisionEntity[] collisionEntities)
@@ -81,7 +85,7 @@ namespace CylinderClass
         }
     }
 
-    class Cylinder : BasicEntity
+    public class Cylinder : BasicEntity
     {
         Texture2D texture;
 
@@ -94,15 +98,13 @@ namespace CylinderClass
 
             quads = new Quad[resolution];
 
-            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(rotation.X, rotation.Y, rotation.Z);
-
             for(int i = 0; i < quads.Length; i++)
             {
                 float angle = (MathHelper.TwoPi / quads.Length) * (float)i;
                 float angle2 = (MathHelper.TwoPi / quads.Length) * ((float)i + 1);
 
-                Vector3 pos1 = new Vector3(MathF.Cos(angle) * radius, position.Y, MathF.Sin(angle) * radius);
-                Vector3 pos2 = new Vector3(MathF.Cos(angle2) * radius, position.Y, MathF.Sin(angle2) * radius);
+                Vector3 pos1 = new Vector3(MathF.Cos(angle) * radius, 0f, MathF.Sin(angle) * radius);
+                Vector3 pos2 = new Vector3(MathF.Cos(angle2) * radius, 0f, MathF.Sin(angle2) * radius);
                 Vector3 center = (pos1 + pos2)/2f;
 
                 float zRotation = 0f;
@@ -114,8 +116,8 @@ namespace CylinderClass
                 quads[i] = new Quad(center, new Vector3(MathF.Atan(center.X/center.Z) + zRotation, 0, 0), Vector3.Distance(pos1, pos2)/2f , height/2f);
             }
             
-            circles[0] = new Circle(radius, resolution, position + Vector3.Transform(new Vector3(0, height/2f, 0), rotationMatrix), rotation + new Vector3(0, MathHelper.Pi, 0));
-            circles[1] = new Circle(radius, resolution, position - Vector3.Transform(new Vector3(0, height/2f, 0), rotationMatrix), rotation);
+            circles[0] = new Circle(radius, resolution, new Vector3(0, height/2f, 0), new Vector3(0, MathHelper.Pi, 0));
+            circles[1] = new Circle(radius, resolution, -1f * new Vector3(0, height/2f, 0), new Vector3(0, 0, 0));
         }
 
         public override void draw(BasicEffect effect)

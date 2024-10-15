@@ -22,6 +22,7 @@ using CubeClass;
 using CylinderClass;
 using WheelClass;
 using System.IO;
+using System.Linq.Expressions;
 
 // MAKE SURE YOU RENAME ALL PROJECT FILES FROM DevcadeGame TO YOUR YOUR GAME NAME
 namespace RacingGame
@@ -58,6 +59,8 @@ namespace RacingGame
 
 
 		private static Texture2D textureTest;
+		private static VertexPositionColorNormalTexture[] debugAxes;
+		private static Texture2D axesTexture;
 
 		private static Random random;
 
@@ -109,6 +112,14 @@ namespace RacingGame
 			cameraPlayer1 = new Camera(new Vector3(0, 0, 40), Vector3.Zero, _graphics);
 
 			random = new Random(Seed: 1);
+
+			debugAxes = new VertexPositionColorNormalTexture[6];
+			debugAxes[0] = new VertexPositionColorNormalTexture(Vector3.Zero, Color.White, Vector3.Up, new Vector2(0.5f, 0.5f));
+			debugAxes[1] = new VertexPositionColorNormalTexture(Vector3.Right, Color.White, Vector3.Up, new Vector2(0.5f, 0.5f));
+			debugAxes[2] = new VertexPositionColorNormalTexture(Vector3.Zero, Color.White, Vector3.Up, new Vector2(0, 0));
+			debugAxes[3] = new VertexPositionColorNormalTexture(Vector3.Up, Color.White, Vector3.Up, new Vector2(0, 0));
+			debugAxes[4] = new VertexPositionColorNormalTexture(Vector3.Zero, Color.White, Vector3.Up, new Vector2(1, 0));
+			debugAxes[5] = new VertexPositionColorNormalTexture(Vector3.Forward, Color.White, Vector3.Up, new Vector2(1, 0));
 
 			//entityManager.add(new FireEffect(particleManager, Vector3.Right, Vector3.Zero, new Vector3(4f, 2f, 4f), new Vector3(5f, 4f, 5f), 320f, 0f, 100f, _graphics.GraphicsDevice, cameraPlayer1));
 			
@@ -184,6 +195,9 @@ namespace RacingGame
 			base.Initialize();
 		}
 
+		static CollisionCube testCube;
+		static Wheel wheel;
+
 		/// <summary>
 		/// Performs any setup that requires loaded content before the first frame.
 		/// </summary>
@@ -195,16 +209,19 @@ namespace RacingGame
 
 			DebugFont = Content.Load<SpriteFont>("DebigFont");
 			Texture2D tireTexure = Content.Load<Texture2D>("tireTexture");
+			axesTexture = Content.Load<Texture2D>("redGreenBlueTex");
 
-			entityManager.add(new CollisionCube(10,1,10, Vector3.Zero, Vector3.Zero, textureTest, GraphicsDevice));
+			testCube = new CollisionCube(10,2,10, Vector3.Up * 10, Vector3.Zero, textureTest, GraphicsDevice);
+			entityManager.add(testCube);
 			//entityManager.add(new Cylinder(2f, 1f, 30, new Vector3(0,10,0), Vector3.Zero, textureTest, GraphicsDevice));
-			entityManager.add(new Wheel(new Vector3(0, 5, 0), Vector3.Zero, tireTexure, GraphicsDevice));
+			wheel = new Wheel(new Vector3(0, 20, 0), new Vector3(0, MathHelper.PiOver2, 0), textureTest, GraphicsDevice);
+			entityManager.add(wheel);
 			// TODO: use this.Content to load your game content here
 			// ex:
 			// texture = Content.Load<Texture2D>("fileNameWithoutExtension");
 		}
 
-		static float deltaTime;
+		float deltaTime;
 		/// <summary>
 		/// Your main update loop. This runs once every frame, over and over.
 		/// </summary>
@@ -224,7 +241,7 @@ namespace RacingGame
 			{
 				Exit();
 			}
-
+			
 			// TODO: Add your update logic here
 
 			particleManager.physicsTick(deltaTime);
@@ -240,13 +257,20 @@ namespace RacingGame
 			if(inputHandler.isKeyDown((int)Actions.translateDown))    { cameraPlayer1.deltaMove(Vector3.Down     * deltaTime * 2f ); }
 
 			//camera rotation
-			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0)  * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0) * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(deltaTime, 0, 0) * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0)  * 2f; }
+			// if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(deltaTime, 0, 0)  * 2f; }
+			// if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0) * 2f; }
+			// if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0) * 2f; }
+			// if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0)  * 2f; }
+
+			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { wheel.rotation += Vector3.Forward; }
+			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { wheel.rotation += Vector3.Backward; }
+			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { wheel.rotation += Vector3.Left; }
+			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { wheel.rotation += Vector3.Right; }
 
 			//other camera movement modifiers
-			if(inputHandler.isKeyDown((int)Actions.boost))            { cameraPlayer1.speed = 6f; } else { cameraPlayer1.speed = 2f; }
+			if(inputHandler.isKeyDown((int)Actions.boost))            { cameraPlayer1.speed = 8f; } else { cameraPlayer1.speed = 2f; }
+			//if(inputHandler.isKeyDown((int)Actions.boost))            { testCube.position += Vector3.Down * deltaTime; }
+
 #else
 
 #endif
@@ -284,9 +308,40 @@ namespace RacingGame
 			entityManager.draw(basicEffect);
 
 			_spriteBatch.DrawString(DebugFont, cameraPlayer1.rotation.ToString(), new Vector2(10, 10), Color.DarkOrange);
-			_spriteBatch.DrawString(DebugFont, cameraPlayer1.position.ToString(), new Vector2(10, 100), Color.DarkGreen);
+			_spriteBatch.DrawString(DebugFont, cameraPlayer1.position.ToString(), new Vector2(10, 40), Color.DarkGreen);
 
-			_spriteBatch.Draw(textureTest, new Rectangle(500, 10, 100, 100), Color.White);
+			for(int i = 0; i < entityManager.physicalEntities.Count; i++)
+			{
+				_spriteBatch.DrawString(DebugFont, entityManager.physicalEntities[i].position.ToString(), new Vector2(10, 60 + 20 * i), Color.DeepPink);
+				_spriteBatch.DrawString(DebugFont, entityManager.physicalEntities[i].rotation.ToString(), new Vector2(310, 60 + 20 * i), Color.DarkOrange);
+				_spriteBatch.DrawString(DebugFont, entityManager.physicalEntities[i].boundingMesh.rotation.ToString(), new Vector2(610, 60 + 20 * i), Color.Black);
+			}
+
+			_spriteBatch.DrawString(DebugFont, (1f/(float)gameTime.ElapsedGameTime.TotalSeconds).ToString(), new Vector2(1000, 40), Color.DarkGreen);
+
+			_spriteBatch.Draw(textureTest, new Rectangle(10, 500, 100, 100), Color.White);
+#if DEBUG
+			BasicEffect axesEffect = new BasicEffect(GraphicsDevice);
+
+			axesEffect.EnableDefaultLighting();
+			axesEffect.VertexColorEnabled = true;
+			axesEffect.LightingEnabled = true;
+			axesEffect.TextureEnabled = true;
+			axesEffect.Texture = axesTexture;
+
+			axesEffect.World = Matrix.CreateTranslation(Vector3.Up * 17);
+			axesEffect.View = cameraPlayer1.viewMatrix;
+			axesEffect.Projection = cameraPlayer1.projectionMatrix;
+
+			foreach(EffectTechnique technique in axesEffect.Techniques)
+			{
+				foreach(EffectPass pass in technique.Passes)
+				{
+					pass.Apply();
+					GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, debugAxes, 0, 3, VertexPositionColorNormalTexture.VertexDeclaration);
+				}
+			}
+#endif
 			
 			_spriteBatch.End();
 

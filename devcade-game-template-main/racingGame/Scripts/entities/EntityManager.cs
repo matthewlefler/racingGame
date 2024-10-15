@@ -1,17 +1,19 @@
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using EntityClass;
+using System.Dynamic;
 
 namespace EntityManagerClass
 {
     public class EntityManager
     {
-        private List<Entity> entities = new List<Entity>();
-        private List<CollisionEntity> physicalEntities = new List<CollisionEntity>();
+        public List<Entity> entities { get; private set; }
+        public List<CollisionEntity> physicalEntities { get; private set; }
 
         public EntityManager()
         {
-
+            entities = new List<Entity>();
+            physicalEntities = new List<CollisionEntity>();
         }
 
         public void draw(BasicEffect effect)

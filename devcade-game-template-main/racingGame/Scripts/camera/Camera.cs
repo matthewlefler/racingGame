@@ -11,11 +11,11 @@ namespace CameraClass
         public Vector3 position { get; set; }
 
         private Vector3 _rotation;
-        public Vector3 rotation { get{ return _rotation; } set{ _rotation = value; if(_rotation.Y > MathHelper.PiOver2) { _rotation.Y = MathHelper.PiOver2; } if(_rotation.Y < -1 * MathHelper.PiOver2) { _rotation.Y = -1 * MathHelper.PiOver2; } } }
+        public Vector3 rotation { get{ return _rotation; } set{ _rotation = value; if(_rotation.X > 1.2f) { _rotation.X = 1.2f; } if(_rotation.X < -1 * 1.2f) { _rotation.X = -1 * 1.2f; } } }
 
         public float speed = 2f;
 
-        public Matrix viewMatrix { get { return Matrix.CreateLookAt(position, position + Matrix.CreateFromYawPitchRoll(rotation.X, rotation.Y, rotation.Z).Forward * 10, Vector3.Up); } private set { } }    
+        public Matrix viewMatrix { get { return Matrix.CreateLookAt(position, position + Matrix.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z).Forward * 10, Vector3.Up); } private set { } }    
         public Matrix projectionMatrix;
 
         public Camera(Vector3 position, Vector3 rotation, GraphicsDeviceManager graphics)
@@ -30,7 +30,7 @@ namespace CameraClass
 
         public void deltaMove(Vector3 translation)
         {
-            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(rotation.X, rotation.Y, rotation.Z);
+            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
             this.position += Vector3.Transform(translation * speed, rotationMatrix);
         }
 

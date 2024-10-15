@@ -46,7 +46,7 @@ namespace CircleClass
                 Vector3 point1 = new Vector3(MathF.Cos(angle), 0f, MathF.Sin(angle)) * radius;
                 Vector3 point2 = new Vector3(MathF.Cos(angle2), 0f, MathF.Sin(angle2)) * radius;
 
-                vertices[t]     = new VertexPositionColorNormalTexture(position, Color.White, normal, new Vector2(0.5f,0.5f));
+                vertices[t]     = new VertexPositionColorNormalTexture(position, Color.White, normal, new Vector2(1f,1f));
                 vertices[t + 1] = new VertexPositionColorNormalTexture(position + Vector3.Transform(point1, rotationMatrix), Color.White, normal, new Vector2(0,0));
                 vertices[t + 2] = new VertexPositionColorNormalTexture(position + Vector3.Transform(point2, rotationMatrix), Color.White, normal, new Vector2(0,0));
             }
