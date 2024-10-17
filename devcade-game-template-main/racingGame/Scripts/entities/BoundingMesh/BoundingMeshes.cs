@@ -28,6 +28,28 @@ namespace BoundingMeshesClass
         public float width;
         public float height;
 
+        public Face()
+        {
+            this.plane = new Plane(Vector3.Zero, Vector3.Up);
+            
+            this.position = Vector3.Zero;
+            this.normal = Vector3.Up;
+
+            this.sides = 4;
+
+            this.scale = 1f;
+            this.height = 1f;
+            this.width = 1f;
+
+            this.vertices = new Vector2[sides];
+
+            for(int i = 0; i < sides; i++)
+            {
+                float angle = i * MathHelper.TwoPi/sides;
+                this.vertices[i] = new Vector2(MathF.Sin(angle), MathF.Cos(angle)) * scale;
+            }
+        }
+
         public Face(Vector3 position, Vector3 normal, int sides, float scale)
         {
             this.plane = new Plane(position, normal);
@@ -75,6 +97,25 @@ namespace BoundingMeshesClass
         {
             this.plane = new Plane(this.position, this.normal);
         }
+
+        public Face clone()
+        {
+            Face temp = new Face();
+
+            temp.normal = this.normal;
+            temp.position = this.position;
+
+            temp.vertices = this.vertices;
+            temp.plane = this.plane;
+
+            temp.sides = this.sides;
+
+            temp.scale = this.scale;
+            temp.width = this.width;
+            temp.height = this.height;
+
+            return temp;
+        }
     }
 
     public class BoundingMesh 
@@ -101,12 +142,16 @@ namespace BoundingMeshesClass
 
             Debug.Assert(faces.Length > 0);
 
-            this.orignialFaces = faces;
+            this.orignialFaces = new Face[faces.Length];
+            this.faces = faces;
 
-            foreach(Face face in faces)
+            for (int i = 0; i < faces.Length; i++)
             {
-                face.position += position;
+                orignialFaces[i] = faces[i].clone();
             }
+
+            reCalcRotation();
+            reCalcTranslation();           
 
             this.faces = faces;
             Vector3 max = faces[0].position;
