@@ -216,6 +216,7 @@ namespace RacingGame
 			//entityManager.add(new Cylinder(2f, 1f, 30, new Vector3(0,10,0), Vector3.Zero, textureTest, GraphicsDevice));
 			wheel = new Wheel(new Vector3(0, 20, 0), new Vector3(0, MathHelper.PiOver2, 0), textureTest, GraphicsDevice);
 			entityManager.add(wheel);
+			
 			// TODO: use this.Content to load your game content here
 			// ex:
 			// texture = Content.Load<Texture2D>("fileNameWithoutExtension");
@@ -261,11 +262,6 @@ namespace RacingGame
 			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0) * 2f; }
 			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0) * 2f; }
 			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0)  * 2f; }
-
-			// if(inputHandler.isKeyDown((int)Actions.rotateUp))         { wheel.rotation += Vector3.Forward; }
-			// if(inputHandler.isKeyDown((int)Actions.rotateDown))       { wheel.rotation += Vector3.Backward; }
-			// if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { wheel.rotation += Vector3.Left; }
-			// if(inputHandler.isKeyDown((int)Actions.rotateRight))      { wheel.rotation += Vector3.Right; }
 
 			//other camera movement modifiers
 			if(inputHandler.isKeyDown((int)Actions.boost))            { cameraPlayer1.speed = 8f; } else { cameraPlayer1.speed = 2f; }

@@ -10,7 +10,6 @@ using System.Reflection.PortableExecutable;
 using System.Diagnostics;
 using System;
 using System.Reflection.Metadata.Ecma335;
-
 namespace BoundingMeshesClass
 {
     public class Face
@@ -55,7 +54,7 @@ namespace BoundingMeshesClass
             this.plane = new Plane(position, normal);
 
             this.position = position;
-            this.normal = normal;
+            this.normal = Vector3.Normalize(normal);
 
             this.sides = sides;
 
@@ -77,7 +76,7 @@ namespace BoundingMeshesClass
             this.plane = new Plane(position, normal);
 
             this.position = position;
-            this.normal = normal;
+            this.normal = Vector3.Normalize(normal);
 
             this.sides = 4;
 
@@ -87,10 +86,10 @@ namespace BoundingMeshesClass
 
             this.vertices = new Vector2[4];
 
-            vertices[3] = new Vector2(-0.5f * width, -0.5f * height);      
+            vertices[0] = new Vector2(-0.5f * width, -0.5f * height);      
             vertices[1] = new Vector2(-0.5f * width, 0.5f * height);      
-            vertices[0] = new Vector2(0.5f * width, 0.5f * height);
-            vertices[2] = new Vector2(0.5f * width, -0.5f * height);      
+            vertices[2] = new Vector2(0.5f * width, 0.5f * height);
+            vertices[3] = new Vector2(0.5f * width, -0.5f * height);      
         }
 
         private void calcPlane()
@@ -293,6 +292,7 @@ namespace BoundingMeshesClass
                     continue;
                 }
 
+
                 if(shortestDistance == null)
                 {
                     shortestDistance = distance;
@@ -309,7 +309,7 @@ namespace BoundingMeshesClass
 
         // from ->  https://stackoverflow.com/questions/1119627/how-to-test-if-a-point-is-inside-of-a-convex-polygon-in-2d-integer-coordinates
         // user: Justas, edited by: Aiq0
-        private static bool IsInConvexPolygon(Vector2 testPoint, Vector2[] polygon) 
+        public static bool IsInConvexPolygon(Vector2 testPoint, Vector2[] polygon) 
         {   
             //Check if a triangle or higher n-gon
             Debug.Assert(polygon.Length >= 3);

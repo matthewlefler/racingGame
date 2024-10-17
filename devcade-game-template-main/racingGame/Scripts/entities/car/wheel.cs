@@ -46,11 +46,19 @@ namespace WheelClass
         public override void tick(float frameTimeInSeconds, CollisionEntity[] collisionEntities)
         {
             this.velocity += this.acceleration * frameTimeInSeconds;
-            this.acceleration += new Vector3(0, -0f, 0) * frameTimeInSeconds;
+            this.acceleration += new Vector3(0, -1f, 0) * frameTimeInSeconds;
 
-            this.rotation = new Vector3(0.0f, 0.0f, 0.0f) * frameTimeInSeconds;
+            this.rotation += new Vector3(0.15f, 0.1f, 0.2f) * frameTimeInSeconds;
 
             this.move(this.velocity * frameTimeInSeconds, collisionEntities);
+
+            if(this.position.Y < 0f)
+            {
+                this.position = new Vector3(0,20,0);
+
+                this.acceleration = Vector3.Zero;
+                this.velocity = Vector3.Zero;
+            }
         }
     }
 }

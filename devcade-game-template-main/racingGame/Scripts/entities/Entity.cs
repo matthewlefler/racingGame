@@ -128,6 +128,11 @@ namespace EntityClass
         /// <param name="effect"></param>
         public abstract void draw(BasicEffect effect);
 
+        /// <summary>
+        /// This is meant for debug use only and is not optimized enough for any other use
+        /// </summary>
+        /// <param name="effect"></param>
+        /// <param name="graphicsDevice"></param>
         public void drawBoundingMesh(BasicEffect effect, GraphicsDevice graphicsDevice)
         {
             effect.World = Matrix.Identity;
@@ -162,7 +167,6 @@ namespace EntityClass
 
                 vertices.Add(new VertexPositionColorTexture(face.position + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
                 vertices.Add(new VertexPositionColorTexture(face.position + face.normal + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
-
             }
             
             vertices.Add(new VertexPositionColorTexture(this.boundingMesh.position + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
@@ -170,6 +174,11 @@ namespace EntityClass
 
             vertices.Add(new VertexPositionColorTexture(this.boundingMesh.position + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
             vertices.Add(new VertexPositionColorTexture(this.boundingMesh.position + this.boundingMesh.localForward + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
+
+            vertices.Add(new VertexPositionColorTexture(this.boundingMesh.position + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
+            vertices.Add(new VertexPositionColorTexture(this.boundingMesh.position + Vector3.Normalize(this.velocity) + (Vector3.Up * 2f), Color.Red, Vector2.Zero));
+
+            
 
 
             foreach(EffectTechnique technique in effect.Techniques)
@@ -181,6 +190,8 @@ namespace EntityClass
                     graphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.LineList, vertices.ToArray(), 0, vertices.Count/2);
                 }
             }
+
+
         }
 
         /// <summary>
@@ -217,12 +228,10 @@ namespace EntityClass
                 if(distanceFromCenter.HasValue)
                 {
                     rayOrigin = this.position + (unitTranslation * distanceFromCenter.Value);
-                    shortestDistanceFromCenter = distanceFromCenter.Value;
                 }
                 else
                 {
                     rayOrigin = this.position;
-                    shortestDistanceFromCenter = 0f;
                 }
 
                 List<CollisionEntity> otherEntitiesList = otherEntities.ToList<CollisionEntity>();
@@ -241,29 +250,16 @@ namespace EntityClass
                     Ray ray = new Ray(rayOrigin, unitTranslation);
                     Ray centerRay = new Ray(this.position, unitTranslation);
 
-                    float? distance = entity.boundingMesh.rayIntersects(ray);
+                    float? distance = entity.boundingMesh.rayIntersects(ray); 
                     float? centerDistance = entity.boundingMesh.rayIntersects(centerRay);
+
+                    Debug.WriteLine(distance);
 
                     if(distance.HasValue && distance < shortestDistance)
                     {
                         shortestDistance = distance.Value;
                         entityHit = entity;
                     }
-
-                    if(centerDistance.HasValue && centerDistance < shortestDistanceFromCenter)
-                    {
-                        shortestDistanceFromCenter = centerDistance.Value;
-                    }
-                }
-
-                if(distanceFromCenter.HasValue && shortestDistanceFromCenter < distanceFromCenter)
-                {
-                    this.position -= unitTranslation * (distanceFromCenter.Value - shortestDistanceFromCenter);
-
-                    this.acceleration = Vector3.Zero;
-                    this.velocity = Vector3.Zero;
-
-                    return;
                 }
 
                 this.position += unitTranslation * shortestDistance;
