@@ -9,17 +9,12 @@ using CameraClass;
 using ParticleManagerClass;
 using ParticleClass;
 
-using EntityManagerClass;
-using EntityClass;
-
 using solidColorTextures;
 using input;
 using System.Collections.Generic;
 using System;
 
 using FireEffectClass;
-using CubeClass;
-using CylinderClass;
 using WheelClass;
 using System.IO;
 using System.Linq.Expressions;
@@ -39,7 +34,6 @@ namespace RacingGame
 
 
 		private static ParticleManager particleManager;
-		private static EntityManager entityManager;
 		private static InputHandler inputHandler;
 		private enum Actions
 		{
@@ -107,7 +101,6 @@ namespace RacingGame
 			windowSize = GraphicsDevice.Viewport.Bounds;
 
 			particleManager = new ParticleManager();
-			entityManager = new EntityManager();
 
 			cameraPlayer1 = new Camera(new Vector3(0, 0, 40), Vector3.Zero, _graphics);
 
@@ -210,12 +203,6 @@ namespace RacingGame
 			DebugFont = Content.Load<SpriteFont>("DebigFont");
 			Texture2D tireTexure = Content.Load<Texture2D>("tireTexture");
 			axesTexture = Content.Load<Texture2D>("redGreenBlueTex");
-
-			testCube = new CollisionCube(10,2,10, Vector3.Up * 10, Vector3.Zero, textureTest, GraphicsDevice);
-			entityManager.add(testCube);
-			//entityManager.add(new Cylinder(2f, 1f, 30, new Vector3(0,10,0), Vector3.Zero, textureTest, GraphicsDevice));
-			wheel = new Wheel(new Vector3(0, 20, 0), new Vector3(0, MathHelper.PiOver2, 0), textureTest, GraphicsDevice);
-			entityManager.add(wheel);
 			
 			// TODO: use this.Content to load your game content here
 			// ex:
@@ -246,7 +233,6 @@ namespace RacingGame
 			// TODO: Add your update logic here
 
 			particleManager.physicsTick(deltaTime);
-			entityManager.physicsTick(deltaTime);
 
 #if DEBUG
 			//camera translation
@@ -301,17 +287,9 @@ namespace RacingGame
 			// TODO: Add your drawing code here
 
 			particleManager.draw(GraphicsDevice, basicEffect);
-			entityManager.draw(basicEffect);
 
 			_spriteBatch.DrawString(DebugFont, cameraPlayer1.rotation.ToString(), new Vector2(10, 10), Color.DarkOrange);
 			_spriteBatch.DrawString(DebugFont, cameraPlayer1.position.ToString(), new Vector2(10, 40), Color.DarkGreen);
-
-			for(int i = 0; i < entityManager.physicalEntities.Count; i++)
-			{
-				_spriteBatch.DrawString(DebugFont, entityManager.physicalEntities[i].position.ToString(), new Vector2(10, 60 + 20 * i), Color.DeepPink);
-				_spriteBatch.DrawString(DebugFont, entityManager.physicalEntities[i].rotation.ToString(), new Vector2(310, 60 + 20 * i), Color.DarkOrange);
-				_spriteBatch.DrawString(DebugFont, entityManager.physicalEntities[i].boundingMesh.rotation.ToString(), new Vector2(610, 60 + 20 * i), Color.Black);
-			}
 
 			_spriteBatch.DrawString(DebugFont, (1f/(float)gameTime.ElapsedGameTime.TotalSeconds).ToString(), new Vector2(1000, 40), Color.DarkGreen);
 

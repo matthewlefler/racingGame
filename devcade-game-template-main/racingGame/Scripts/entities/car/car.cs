@@ -4,7 +4,6 @@ using solidColorTextures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.CompilerServices;
-using EntityClass;
 using Microsoft.Xna.Framework.Input;
 using System;
 
