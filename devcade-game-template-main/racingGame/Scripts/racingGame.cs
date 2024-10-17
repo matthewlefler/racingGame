@@ -188,7 +188,6 @@ namespace RacingGame
 			base.Initialize();
 		}
 
-		static CollisionCube testCube;
 		static Wheel wheel;
 
 		/// <summary>
