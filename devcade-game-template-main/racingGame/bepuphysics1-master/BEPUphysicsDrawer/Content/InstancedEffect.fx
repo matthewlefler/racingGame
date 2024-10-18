@@ -58,12 +58,12 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     return output;
 }
 
-float3 PixelShaderFunction(VertexShaderOutput input) : COLOR0
+float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 
 	float halfPixel = .5f / NUM_TEXTURES;
     
-	float3 surfaceColor = tex2D(ColorSampler, float2(halfPixel + halfPixel * 2 * input.TextureIndex, halfPixel)).xyz;
+	float4 surfaceColor = tex2D(ColorSampler, float2(halfPixel + halfPixel * 2 * input.TextureIndex, halfPixel)).xyzw;
 
 		
 	float3 normal = normalize(input.Normal);
@@ -71,7 +71,7 @@ float3 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     float diffuseAmount2 = saturate(-dot(normal, LightDirection2));
   
     
-	surfaceColor =  AmbientAmount * surfaceColor + surfaceColor * (diffuseAmount1 * DiffuseColor1 + diffuseAmount2 * DiffuseColor2);
+	surfaceColor =  AmbientAmount * surfaceColor + surfaceColor * float4(diffuseAmount1 * DiffuseColor1 + diffuseAmount2 * DiffuseColor2, 1);
     return surfaceColor;
 }
 
@@ -79,7 +79,7 @@ technique Technique1
 {
     pass Pass1
     {
-        VertexShader = compile vs_4_0 VertexShaderFunction();
-        PixelShader = compile ps_4_0 PixelShaderFunction();
+        VertexShader = compile vs_3_0 VertexShaderFunction();
+        PixelShader = compile ps_3_0 PixelShaderFunction();
     }
 }

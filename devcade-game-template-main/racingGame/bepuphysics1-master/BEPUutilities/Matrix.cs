@@ -326,19 +326,6 @@ namespace BEPUutilities
         }
 
         /// <summary>
-        /// Returns an equvlient 4x4 monogame matrix
-        /// </summary>
-        /// <returns></returns>
-        public Microsoft.Xna.Framework.Matrix toMonogame()
-		{
-			return new Microsoft.Xna.Framework.Matrix(
-            this.M11, this.M12, this.M13, this.M14, 
-            this.M21, this.M22, this.M23, this.M24, 
-            this.M31, this.M32, this.M33, this.M34, 
-            this.M41, this.M42, this.M43, this.M44);
-		}
-
-        /// <summary>
         /// Transposes the matrix in-place.
         /// </summary>
         public void Transpose()

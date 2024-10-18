@@ -22,6 +22,7 @@ using System.Linq.Expressions;
 using BEPUphysics;
 using BEPUutilities.DataStructures;
 using BEPUphysics.Entities.Prefabs;
+using static ConversionHelper.MathConverter;
 using System.Xml.Linq;
 
 // MAKE SURE YOU RENAME ALL PROJECT FILES FROM DevcadeGame TO YOUR YOUR GAME NAME
@@ -306,8 +307,8 @@ namespace RacingGame
 
 			basicEffect.EmissiveColor = Vector3.One;
 
-			basicEffect.View = cameraPlayer1.ViewMatrix.toMonogame();
-			basicEffect.Projection = cameraPlayer1.ProjectionMatrix.toMonogame();
+			basicEffect.View = Convert(cameraPlayer1.ViewMatrix);
+			basicEffect.Projection = Convert(cameraPlayer1.ProjectionMatrix);
 			
 			// Batches all the draw calls for this frame, and then performs them all at once
 			_spriteBatch.Begin();
@@ -331,8 +332,8 @@ namespace RacingGame
 			axesEffect.Texture = axesTexture;
 
 			axesEffect.World = Matrix.CreateTranslation(Vector3.Up * 17);
-			axesEffect.View = cameraPlayer1.ViewMatrix.toMonogame();
-			axesEffect.Projection = cameraPlayer1.ProjectionMatrix.toMonogame();
+			axesEffect.View = Convert(cameraPlayer1.ViewMatrix);
+			axesEffect.Projection = Convert(cameraPlayer1.ProjectionMatrix);
 
 			foreach(EffectTechnique technique in axesEffect.Techniques)
 			{
