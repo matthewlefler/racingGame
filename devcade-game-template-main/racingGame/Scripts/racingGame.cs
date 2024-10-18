@@ -22,7 +22,7 @@ using System.Linq.Expressions;
 using BEPUphysics;
 using BEPUutilities.DataStructures;
 using BEPUphysics.Entities.Prefabs;
-using BEPUphysicsDrawer;
+using System.Xml.Linq;
 
 // MAKE SURE YOU RENAME ALL PROJECT FILES FROM DevcadeGame TO YOUR YOUR GAME NAME
 namespace RacingGame
@@ -35,7 +35,8 @@ namespace RacingGame
 		private static SpriteBatch _spriteBatch;
 		private static TextureMaker textureMaker = new TextureMaker();
 
-		private static BEPUphysicsDemos.Camera cameraPlayer1;
+		private BEPUphysicsDemos.Camera cameraPlayer1;
+		private float cameraMovementSpeed = 2f;
 
 
 		private static ParticleManager particleManager;
@@ -262,21 +263,21 @@ namespace RacingGame
 
 #if DEBUG
 			//camera translation
-			if(inputHandler.isKeyDown((int)Actions.translateForward)) { cameraPlayer1.Position += BEPUutilities.Vector3.Forward  * deltaTime * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.translateBack))    { cameraPlayer1.Position += BEPUutilities.Vector3.Backward * deltaTime * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.translateLeft))    { cameraPlayer1.Position += BEPUutilities.Vector3.Left     * deltaTime * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.translateRight))   { cameraPlayer1.Position += BEPUutilities.Vector3.Right    * deltaTime * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.translateUp))      { cameraPlayer1.Position += BEPUutilities.Vector3.Up       * deltaTime * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.translateDown))    { cameraPlayer1.Position += BEPUutilities.Vector3.Down     * deltaTime * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.translateForward)) { cameraPlayer1.Position += BEPUutilities.Vector3.Forward  * deltaTime * cameraMovementSpeed; }
+			if(inputHandler.isKeyDown((int)Actions.translateBack))    { cameraPlayer1.Position += BEPUutilities.Vector3.Backward * deltaTime * cameraMovementSpeed; }
+			if(inputHandler.isKeyDown((int)Actions.translateLeft))    { cameraPlayer1.Position += BEPUutilities.Vector3.Left     * deltaTime * cameraMovementSpeed; }
+			if(inputHandler.isKeyDown((int)Actions.translateRight))   { cameraPlayer1.Position += BEPUutilities.Vector3.Right    * deltaTime * cameraMovementSpeed; }
+			if(inputHandler.isKeyDown((int)Actions.translateUp))      { cameraPlayer1.Position += BEPUutilities.Vector3.Up       * deltaTime * cameraMovementSpeed; }
+			if(inputHandler.isKeyDown((int)Actions.translateDown))    { cameraPlayer1.Position += BEPUutilities.Vector3.Down     * deltaTime * cameraMovementSpeed; }
 
 			// camera rotation
-			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.Pitch += new Vector3(deltaTime, 0, 0)  * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0) * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0) * 2f; }
-			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0)  * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.Pitch(deltaTime); }
+			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.Pitch(-deltaTime); }
+			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.Yaw(-deltaTime); }
+			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.Yaw(deltaTime); }
 
 			//other camera movement modifiers
-			if(inputHandler.isKeyDown((int)Actions.boost))            { cameraPlayer1.speed = 8f; } else { cameraPlayer1.speed = 2f; }
+			if(inputHandler.isKeyDown((int)Actions.boost))            { cameraMovementSpeed = 8f; } else { cameraMovementSpeed = 2f; }
 			//if(inputHandler.isKeyDown((int)Actions.boost))            { testCube.position += Vector3.Down * deltaTime; }
 
 #else
@@ -305,8 +306,8 @@ namespace RacingGame
 
 			basicEffect.EmissiveColor = Vector3.One;
 
-			basicEffect.View = cameraPlayer1.viewMatrix;
-			basicEffect.Projection = cameraPlayer1.projectionMatrix;
+			basicEffect.View = cameraPlayer1.ViewMatrix.toMonogame();
+			basicEffect.Projection = cameraPlayer1.ProjectionMatrix.toMonogame();
 			
 			// Batches all the draw calls for this frame, and then performs them all at once
 			_spriteBatch.Begin();
@@ -314,8 +315,8 @@ namespace RacingGame
 
 			particleManager.draw(GraphicsDevice, basicEffect);
 
-			_spriteBatch.DrawString(DebugFont, cameraPlayer1.rotation.ToString(), new Vector2(10, 10), Color.DarkOrange);
-			_spriteBatch.DrawString(DebugFont, cameraPlayer1.position.ToString(), new Vector2(10, 40), Color.DarkGreen);
+			_spriteBatch.DrawString(DebugFont, cameraPlayer1.ViewDirection.ToString(), new Vector2(10, 10), Color.DarkOrange);
+			_spriteBatch.DrawString(DebugFont, cameraPlayer1.Position.ToString(), new Vector2(10, 40), Color.DarkGreen);
 
 			_spriteBatch.DrawString(DebugFont, (1f/(float)gameTime.ElapsedGameTime.TotalSeconds).ToString(), new Vector2(1000, 40), Color.DarkGreen);
 
@@ -330,8 +331,8 @@ namespace RacingGame
 			axesEffect.Texture = axesTexture;
 
 			axesEffect.World = Matrix.CreateTranslation(Vector3.Up * 17);
-			axesEffect.View = cameraPlayer1.viewMatrix;
-			axesEffect.Projection = cameraPlayer1.projectionMatrix;
+			axesEffect.View = cameraPlayer1.ViewMatrix.toMonogame();
+			axesEffect.Projection = cameraPlayer1.ProjectionMatrix.toMonogame();
 
 			foreach(EffectTechnique technique in axesEffect.Techniques)
 			{
@@ -346,6 +347,11 @@ namespace RacingGame
 			_spriteBatch.End();
 
 			base.Draw(gameTime);
+		}
+
+		private Microsoft.Xna.Framework.Matrix toMonogame(BEPUutilities.Matrix matrix)
+		{
+			return new Microsoft.Xna.Framework.Matrix(matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44);
 		}
 	}
 }
