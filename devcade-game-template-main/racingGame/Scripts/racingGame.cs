@@ -19,6 +19,11 @@ using WheelClass;
 using System.IO;
 using System.Linq.Expressions;
 
+using BEPUphysics;
+using BEPUutilities.DataStructures;
+using BEPUphysics.Entities.Prefabs;
+using BEPUphysicsDrawer;
+
 // MAKE SURE YOU RENAME ALL PROJECT FILES FROM DevcadeGame TO YOUR YOUR GAME NAME
 namespace RacingGame
 {
@@ -30,7 +35,7 @@ namespace RacingGame
 		private static SpriteBatch _spriteBatch;
 		private static TextureMaker textureMaker = new TextureMaker();
 
-		private static Camera cameraPlayer1;
+		private static BEPUphysicsDemos.Camera cameraPlayer1;
 
 
 		private static ParticleManager particleManager;
@@ -58,6 +63,14 @@ namespace RacingGame
 
 		private static Random random;
 
+
+		#region Physics varibles
+
+		Space space = new Space(); 
+		
+
+		#endregion
+
 		
 		/// <summary>
 		/// Stores the window dimensions in a rectangle object for easy use
@@ -83,6 +96,19 @@ namespace RacingGame
 			Input.Initialize();
 			//Persistence.Init(); Uncomment if using the persistence section for save and load
 
+			#region Physics init
+
+			space.ForceUpdater.gravity = new BEPUutilities.Vector3(0f, 9.81f, 0f); 
+			Box ground = new Box(BEPUutilities.Vector3.Zero, 30, 1, 30);
+			
+			space.Add(ground);
+
+			space.Add(new Box(new BEPUutilities.Vector3(0, 4, 0), 1, 1, 1, 1)); 
+			space.Add(new Box(new BEPUutilities.Vector3(0, 8, 0), 1, 1, 1, 1)); 
+			space.Add(new Box(new BEPUutilities.Vector3(0, 12, 0), 1, 1, 1, 1));
+
+			#endregion
+
 			// Set window size if running debug (in release it will be fullscreen)
 			#region
 #if DEBUG
@@ -102,7 +128,7 @@ namespace RacingGame
 
 			particleManager = new ParticleManager();
 
-			cameraPlayer1 = new Camera(new Vector3(0, 0, 40), Vector3.Zero, _graphics);
+			cameraPlayer1 = new BEPUphysicsDemos.Camera(new BEPUutilities.Vector3(0, 0, 40), 0f, 0f, BEPUutilities.Matrix.CreatePerspectiveFieldOfViewRH(90, 1, 0.01f, 1000f)); 
 
 			random = new Random(Seed: 1);
 
@@ -216,6 +242,7 @@ namespace RacingGame
 		protected override void Update(GameTime gameTime)
 		{
 			deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+			space.Update();
 
 			Input.Update(); // Updates the state of the input library
 
@@ -235,15 +262,15 @@ namespace RacingGame
 
 #if DEBUG
 			//camera translation
-			if(inputHandler.isKeyDown((int)Actions.translateForward)) { cameraPlayer1.deltaMove(Vector3.Forward  * deltaTime * 2f ); }
-			if(inputHandler.isKeyDown((int)Actions.translateBack))    { cameraPlayer1.deltaMove(Vector3.Backward * deltaTime * 2f ); }
-			if(inputHandler.isKeyDown((int)Actions.translateLeft))    { cameraPlayer1.deltaMove(Vector3.Left     * deltaTime * 2f ); }
-			if(inputHandler.isKeyDown((int)Actions.translateRight))   { cameraPlayer1.deltaMove(Vector3.Right    * deltaTime * 2f ); }
-			if(inputHandler.isKeyDown((int)Actions.translateUp))      { cameraPlayer1.deltaMove(Vector3.Up       * deltaTime * 2f ); }
-			if(inputHandler.isKeyDown((int)Actions.translateDown))    { cameraPlayer1.deltaMove(Vector3.Down     * deltaTime * 2f ); }
+			if(inputHandler.isKeyDown((int)Actions.translateForward)) { cameraPlayer1.Position += BEPUutilities.Vector3.Forward  * deltaTime * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.translateBack))    { cameraPlayer1.Position += BEPUutilities.Vector3.Backward * deltaTime * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.translateLeft))    { cameraPlayer1.Position += BEPUutilities.Vector3.Left     * deltaTime * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.translateRight))   { cameraPlayer1.Position += BEPUutilities.Vector3.Right    * deltaTime * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.translateUp))      { cameraPlayer1.Position += BEPUutilities.Vector3.Up       * deltaTime * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.translateDown))    { cameraPlayer1.Position += BEPUutilities.Vector3.Down     * deltaTime * 2f; }
 
 			// camera rotation
-			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.rotation += new Vector3(deltaTime, 0, 0)  * 2f; }
+			if(inputHandler.isKeyDown((int)Actions.rotateUp))         { cameraPlayer1.Pitch += new Vector3(deltaTime, 0, 0)  * 2f; }
 			if(inputHandler.isKeyDown((int)Actions.rotateDown))       { cameraPlayer1.rotation += new Vector3(-deltaTime, 0, 0) * 2f; }
 			if(inputHandler.isKeyDown((int)Actions.rotateLeft))       { cameraPlayer1.rotation += new Vector3(0, deltaTime, 0) * 2f; }
 			if(inputHandler.isKeyDown((int)Actions.rotateRight))      { cameraPlayer1.rotation += new Vector3(0, -deltaTime, 0)  * 2f; }
